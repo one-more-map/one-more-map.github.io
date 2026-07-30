@@ -4,7 +4,7 @@ import { ModBrowser } from './components/ModBrowser'
 import { Onboarding } from './components/Onboarding'
 import { TooltipLayer } from './components/Tooltip'
 import { generateDemoCharts } from './logic/demo'
-import { buildChartSearch } from './logic/regex'
+import { buildChartSearch, buildSingleChartSearch } from './logic/regex'
 import { ImportPanel } from './components/ImportPanel'
 import { Library } from './components/Library'
 import { SolverPanel } from './components/SolverPanel'
@@ -260,12 +260,8 @@ export default function App() {
     chart.implicitText ??
     chart.modIds.map((id) => voyageModById.get(id)).find((m) => m && m.scope !== 'self')?.text ??
     ''
-  // a PoE stash-search string: name + implicit + level, space-separated. The
-  // in-game search ANDs each word, so this filters to exactly this chart.
-  const chartSearch = (chart: ChartData): string =>
-    [chart.name, chartImplicit(chart), `Level ${chart.level}`].filter(Boolean).join(' ')
   const copyChartDetails = (chart: ChartData) => {
-    navigator.clipboard.writeText(chartSearch(chart)).catch(() => {})
+    navigator.clipboard.writeText(buildSingleChartSearch(chart)).catch(() => {})
   }
   const startCopySeq = () => {
     const order = FILL_ORDER.filter((i) => state.board[i])

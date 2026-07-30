@@ -5,9 +5,28 @@
 // LAUNCH-DAY TODO: confirm what fields the in-game search matches (name, mod
 // text, level?) and whether it supports regex alternation `|` - adjust here.
 
-import { VOYAGE_MODS } from '../data/mods'
+import { VOYAGE_MODS, voyageModById } from '../data/mods'
 import { voyageRewardKey } from './rewards'
-import type { VoyageModDef, Weights } from '../types'
+import type { ChartData, VoyageModDef, Weights } from '../types'
+
+const HANGUL_RE = /[\uac00-\ud7a3]/
+
+/**
+ * Build the search text used to find one exact chart in the in-game inventory.
+ * Imported Korean charts keep Hangul in their verbatim item-derived fields, so
+ * the level term can follow the client language without a separate UI locale.
+ */
+export function buildSingleChartSearch(chart: ChartData): string {
+  const implicit =
+    chart.implicitText ??
+    chart.modIds
+      .map((id) => voyageModById.get(id))
+      .find((mod) => mod && mod.scope !== 'self')?.text ??
+    ''
+  const sourceText = [chart.implicitText, chart.rawText, chart.name].filter(Boolean).join('\n')
+  const level = `${HANGUL_RE.test(sourceText) ? '지역 레벨' : 'Level'} ${chart.level}`
+  return [chart.name, implicit, level].filter(Boolean).join(' ')
+}
 
 /**
  * Build a paste-into-game regex that highlights the BEST charts given the

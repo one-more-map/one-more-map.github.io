@@ -86,6 +86,7 @@ const KOREAN_DIALECT: ClipboardDialect = {
   shape: /^해도 형태\s*[:：]\s*(.+?)\s*$/im,
   shapeLabel: '해도 형태',
   implicitMarker: /^\{\s*고정 속성 부여\s*\}$/i,
+  uncharted: /^해도를 기록하면 항해 속성이 드러남$/im,
   headerStats: [
     { re: /아이템 수량\s*[:：]\s*\+?(\d+)%/i, stat: 'quantity' },
     { re: /아이템 희귀도\s*[:：]\s*\+?(\d+)%/i, stat: 'rarity' },
@@ -115,6 +116,17 @@ function normalizeClipboardText(text: string): string {
 
 function normalizeLookupText(text: string): string {
   return text.normalize('NFKC').toLowerCase().replace(/\s+/g, ' ').trim()
+}
+
+/** Alias matching ignores a rolled value when the clipboard also includes
+ * its invariant range (for example, both 8(8-10) and 9(8-10) become 8-10).
+ * Keep this separate from general lookup normalization: shape lookup and the
+ * verbatim implicit text must not be changed by roll normalization. */
+function normalizeAliasText(text: string): string {
+  return normalizeLookupText(text).replace(
+    /\d+(?:\.\d+)?\s*\(\s*(\d+(?:\.\d+)?)\s*[-‐‑‒–—―−~～]\s*(\d+(?:\.\d+)?)\s*\)/g,
+    '$1-$2',
+  )
 }
 
 function dialectForItem(item: string): ClipboardDialect | undefined {
@@ -183,11 +195,11 @@ function sigWords(s: string): string[] {
 }
 
 function matchLocalizedAlias(line: string): string | null {
-  const normalized = normalizeLookupText(line)
+  const normalized = normalizeAliasText(line)
   const matchingIds = new Set<string>()
   for (const mod of VOYAGE_MODS) {
     if (mod.scope === 'self') continue
-    if (mod.aliases?.some((alias) => normalizeLookupText(alias) === normalized)) {
+    if (mod.aliases?.some((alias) => normalizeAliasText(alias) === normalized)) {
       matchingIds.add(mod.id)
     }
   }

@@ -2,7 +2,29 @@ import { describe, expect, it } from 'vitest'
 import type { ChartData, Edges } from '../types'
 import englishChart from './__fixtures__/charted.en.txt?raw'
 import koreanChart from './__fixtures__/charted.ko.txt?raw'
+import koreanImplicitAliases from './__fixtures__/implicit-aliases.ko.tsv?raw'
+import koreanUncharted from './__fixtures__/uncharted.ko.txt?raw'
 import { isChartClipboardText, parseChartText } from './parser'
+
+const KOREAN_CHARTED_IMPLICIT =
+  '인접 지역 내 몬스터가 떨어뜨리는 장비의 40%가 골드로 전환'
+
+interface KoreanImplicitAliasCase {
+  rawText: string
+  modId: string
+  occurrences: number
+}
+
+const koreanImplicitAliasCases: KoreanImplicitAliasCase[] = koreanImplicitAliases
+  .split(/\r?\n/)
+  .filter((line) => line && !line.startsWith('#'))
+  .map((line) => {
+    const [rawText, modId, occurrencesText] = line.split('\t')
+    if (!rawText || !modId || !occurrencesText) {
+      throw new Error(`Malformed Korean implicit alias fixture row: ${line}`)
+    }
+    return { rawText, modId, occurrences: Number(occurrencesText) }
+  })
 
 function parseOnlyChart(text: string): ChartData {
   const result = parseChartText(text)
@@ -143,6 +165,66 @@ describe('parseChartText', () => {
     )
   })
 
+  it('rejects the full Korean-client uncharted clipboard sample', () => {
+    const result = parseChartText(koreanUncharted)
+
+    expect(result.charts).toEqual([])
+    expect(result.rejected).toEqual([
+      {
+        name: '연안 탐사 모래 덮인 해저 해도',
+        reason: 'not charted yet (run it first to reveal its modifier)',
+      },
+    ])
+  })
+
+  it('maps all observed Korean implicit lines to canonical ids without changing raw text', () => {
+    expect(koreanImplicitAliasCases).toHaveLength(35)
+    expect(koreanImplicitAliasCases.reduce((sum, entry) => sum + entry.occurrences, 0)).toBe(60)
+    expect(new Set(koreanImplicitAliasCases.map(({ modId }) => modId)).size).toBe(31)
+
+    for (const { rawText, modId } of koreanImplicitAliasCases) {
+      const chart = parseOnlyChart(koreanChart.replace(KOREAN_CHARTED_IMPLICIT, rawText))
+      expect(chart.modIds, rawText).toEqual([modId])
+      expect(chart.implicitText, rawText).toBe(rawText)
+    }
+  })
+
+  it('uses the invariant range signature for Korean rolled implicit aliases', () => {
+    const rangedVariants: Record<string, string[]> = {
+      'adj-octo-1': [
+        '인접 지역들에 문어 무리 9(8-10)개 추가 등장',
+        '인접 지역들에 문어 무리 8(8-10)개 추가 등장',
+      ],
+      'adj-star-1': [
+        '인접 지역들에 에 거대 불가사리 5(4-5)마리 추가 등장',
+        '인접 지역들에 에 거대 불가사리 4(4-5)마리 추가 등장',
+      ],
+      'adj-barrel-1': [
+        '인접 지역들에 통 무더기 14(12-15)개 추가 등장',
+        '인접 지역들에 통 무더기 15(12-15)개 추가 등장',
+      ],
+      'adj-barrel-2': [
+        '인접 지역들에 통 무더기 17(16-20)개 추가 등장',
+        '인접 지역들에 통 무더기 18(16-20)개 추가 등장',
+      ],
+    }
+
+    for (const [modId, rawTexts] of Object.entries(rangedVariants)) {
+      expect(
+        koreanImplicitAliasCases
+          .filter((entry) => entry.modId === modId)
+          .map(({ rawText }) => rawText),
+      ).toEqual(rawTexts)
+
+      for (const rawText of rawTexts) {
+        expect(
+          parseOnlyChart(koreanChart.replace(KOREAN_CHARTED_IMPLICIT, rawText)).modIds,
+          rawText,
+        ).toEqual([modId])
+      }
+    }
+  })
+
   it('preserves the existing level 80 fallback when Area Level is absent', () => {
     const chart = parseOnlyChart(englishChart.replace(/^Area Level: 63\r?\n/m, ''))
 
@@ -153,7 +235,7 @@ describe('parseChartText', () => {
     const unknownImplicit = '아직 등록되지 않은 한국어 항해 속성'
     const chart = parseOnlyChart(
       koreanChart.replace(
-        '인접 지역 내 몬스터가 떨어뜨리는 장비의 40%가 골드로 전환',
+        KOREAN_CHARTED_IMPLICIT,
         unknownImplicit,
       ),
     )

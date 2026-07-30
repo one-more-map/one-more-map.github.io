@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { BORDER_MODS, borderModById, voyageModById } from '../data/mods'
 import { rotateEdges } from '../logic/connectivity'
+import { buildSingleChartSearch } from '../logic/regex'
 import type { Board, Borders, ChartData, Placement } from '../types'
 import { START_CELL, STAT_LABELS, STAT_SHORT } from '../types'
 import { tooltipProps } from './Tooltip'
@@ -236,12 +237,7 @@ function Tile({
           title="Copy an in-game search string (name + modifier) to find this exact chart"
           onClick={(e) => {
             e.stopPropagation()
-            const implicitTxt =
-              chart.implicitText ?? mods.find((m) => m!.scope !== 'self')?.text ?? ''
-            const search = [chart.name, implicitTxt, `Level ${chart.level}`]
-              .filter(Boolean)
-              .join(' ')
-            navigator.clipboard.writeText(search).catch(() => {})
+            navigator.clipboard.writeText(buildSingleChartSearch(chart)).catch(() => {})
             setCopied(true)
             window.setTimeout(() => setCopied(false), 1200)
           }}
