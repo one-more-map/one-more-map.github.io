@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ALL_GOOD_MODS_REGEX } from '../data/strategies'
 import { generateDemoCharts } from '../logic/demo'
-import { parseChartText } from '../logic/parser'
+import { isChartClipboardText, parseChartText } from '../logic/parser'
 import type { AppState } from '../logic/storage'
 import { defaultState } from '../logic/storage'
 import type { ChartData } from '../types'
@@ -45,7 +45,7 @@ export function ImportPanel({ onImport, state, onLoadState }: Props) {
   useEffect(() => {
     const onPaste = (e: ClipboardEvent) => {
       const clip = e.clipboardData?.getData('text') ?? ''
-      if (!/Item Class:\s*Chart/i.test(clip)) return
+      if (!isChartClipboardText(clip)) return
       e.preventDefault()
       doParse(clip)
     }

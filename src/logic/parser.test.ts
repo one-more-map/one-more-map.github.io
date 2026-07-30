@@ -1,0 +1,176 @@
+import { describe, expect, it } from 'vitest'
+import type { ChartData, Edges } from '../types'
+import englishChart from './__fixtures__/charted.en.txt?raw'
+import koreanChart from './__fixtures__/charted.ko.txt?raw'
+import { isChartClipboardText, parseChartText } from './parser'
+
+function parseOnlyChart(text: string): ChartData {
+  const result = parseChartText(text)
+  expect(result.rejected).toEqual([])
+  expect(result.charts).toHaveLength(1)
+  return result.charts[0]
+}
+
+describe('parseChartText', () => {
+  it('preserves existing English chart parsing', () => {
+    const chart = parseOnlyChart(englishChart)
+
+    expect(chart).toMatchObject({
+      name: 'Armoured Coral Reef Chart of Ice',
+      level: 63,
+      shape: 'Corner',
+      edges: [true, true, false, false],
+      implicitText: "20% increased Dead Man's Sulphur found in this Area",
+      modIds: ['voy-sulph-2'],
+      rewards: [
+        { stat: 'quantity', percent: 20 },
+        { stat: 'gold', percent: 50 },
+      ],
+      rawText: '+8% Monster Physical Damage Reduction',
+    })
+  })
+
+  it('imports a real Korean-client chart into canonical ids and shape names', () => {
+    const chart = parseOnlyChart(koreanChart)
+
+    expect(chart).toMatchObject({
+      name: '해병 고역 산호 암초 해도',
+      level: 81,
+      shape: 'Junction',
+      edges: [true, true, true, false],
+      implicitText: '인접 지역 내 몬스터가 떨어뜨리는 장비의 40%가 골드로 전환',
+      modIds: ['adj-gold-1'],
+      rewards: [
+        { stat: 'quantity', percent: 32 },
+        { stat: 'rarity', percent: 20 },
+        { stat: 'sulphur', percent: 30 },
+        { stat: 'packsize', percent: 16 },
+      ],
+    })
+    expect(chart.rawText).toContain('몬스터가 19(15-20)%의 추가 물리 피해를 냉기 속성으로 가함')
+    expect(chart.rawText).not.toContain('해저 마루')
+    expect(chart.rawText).not.toContain('이 지역에서 발견하는 망자의 유황 30% 증가')
+  })
+
+  it('parses the Korean Gold Found header observed in supplied clipboard text', () => {
+    const chart = parseOnlyChart(
+      koreanChart.replace(
+        '망자의 유황: +30% (augmented)',
+        '골드 발견량: +70% (augmented)\n망자의 유황: +30% (augmented)',
+      ),
+    )
+
+    expect(chart.rewards).toContainEqual({ stat: 'gold', percent: 70 })
+  })
+
+  const shapeCases: [string, string, string, Edges][] = [
+    ['End', 'End', '끄트머리', [true, false, false, false]],
+    ['Corner', 'Corner', '모서리', [true, true, false, false]],
+    ['Straight', 'Straight', '직선', [true, false, true, false]],
+    ['Junction', 'Junction', '접점', [true, true, true, false]],
+    ['Crossing', 'Crossing', '교차', [true, true, true, true]],
+  ]
+
+  it.each(shapeCases)(
+    'maps English and Korean %s shapes to the same canonical value',
+    (canonical, englishShape, koreanShape, edges) => {
+      const english = parseOnlyChart(
+        englishChart.replace('Chart Shape: Corner', `Chart Shape: ${englishShape}`),
+      )
+      const korean = parseOnlyChart(
+        koreanChart.replace('해도 형태: 접점', `해도 형태: ${koreanShape}`),
+      )
+
+      expect(english).toMatchObject({ shape: canonical, edges })
+      expect(korean).toMatchObject({ shape: canonical, edges })
+    },
+  )
+
+  it('imports mixed English and Korean CRLF clipboard batches', () => {
+    const mixed = `\uFEFF${englishChart.trim()}\n${koreanChart.trim()}`.replace(/\n/g, '\r\n')
+    const result = parseChartText(mixed)
+
+    expect(result.rejected).toEqual([])
+    expect(result.charts.map(({ name, shape }) => ({ name, shape }))).toEqual([
+      { name: 'Armoured Coral Reef Chart of Ice', shape: 'Corner' },
+      { name: '해병 고역 산호 암초 해도', shape: 'Junction' },
+    ])
+  })
+
+  it('keeps non-Chart Korean items out of mixed clipboard batches', () => {
+    const nonChart = `아이템 종류: 갑옷
+아이템 희귀도: 희귀
+해병 갑옷
+--------`
+    const result = parseChartText(`${nonChart}\n${koreanChart}`)
+
+    expect(result.charts).toHaveLength(1)
+    expect(result.charts[0].name).toBe('해병 고역 산호 암초 해도')
+    expect(result.rejected).toEqual([{ name: '해병 갑옷', reason: 'not a Chart item' }])
+  })
+
+  it('rejects an unknown shape without blocking valid items in the same batch', () => {
+    const unknownShape = koreanChart.replace('해도 형태: 접점', '해도 형태: 소용돌이')
+    const result = parseChartText(`${unknownShape}\n${englishChart}`)
+
+    expect(result.charts).toHaveLength(1)
+    expect(result.charts[0].name).toBe('Armoured Coral Reef Chart of Ice')
+    expect(result.rejected).toEqual([
+      { name: '해병 고역 산호 암초 해도', reason: 'unknown 해도 형태: 소용돌이' },
+    ])
+  })
+
+  it('rejects a missing shape instead of guessing a connector layout', () => {
+    const result = parseChartText(koreanChart.replace(/^해도 형태: 접점\r?\n/m, ''))
+
+    expect(result.charts).toEqual([])
+    expect(result.rejected).toEqual([
+      { name: '해병 고역 산호 암초 해도', reason: 'missing 해도 형태' },
+    ])
+  })
+
+  it('preserves the existing English uncharted rejection', () => {
+    const result = parseChartText(
+      englishChart.replace(
+        "20% increased Dead Man's Sulphur found in this Area",
+        'Voyage Modifier will be revealed once Charted',
+      ),
+    )
+
+    expect(result.charts).toEqual([])
+    expect(result.rejected[0]?.reason).toBe(
+      'not charted yet (run it first to reveal its modifier)',
+    )
+  })
+
+  it('preserves the existing level 80 fallback when Area Level is absent', () => {
+    const chart = parseOnlyChart(englishChart.replace(/^Area Level: 63\r?\n/m, ''))
+
+    expect(chart.level).toBe(80)
+  })
+
+  it('preserves unknown Korean implicits instead of rejecting the chart', () => {
+    const unknownImplicit = '아직 등록되지 않은 한국어 항해 속성'
+    const chart = parseOnlyChart(
+      koreanChart.replace(
+        '인접 지역 내 몬스터가 떨어뜨리는 장비의 40%가 골드로 전환',
+        unknownImplicit,
+      ),
+    )
+
+    expect(chart.modIds).toEqual([])
+    expect(chart.implicitText).toBe(unknownImplicit)
+  })
+})
+
+describe('isChartClipboardText', () => {
+  it('accepts English and Korean Chart headers, including BOM and CRLF text', () => {
+    expect(isChartClipboardText(englishChart)).toBe(true)
+    expect(isChartClipboardText(`\uFEFF${koreanChart.replace(/\n/g, '\r\n')}`)).toBe(true)
+  })
+
+  it('does not intercept non-Chart Korean clipboard text or ordinary prose', () => {
+    expect(isChartClipboardText('아이템 종류: 갑옷\n아이템 희귀도: 희귀')).toBe(false)
+    expect(isChartClipboardText('일반 문장 안의 아이템 종류: 해도 표기는 붙여넣기로 처리하지 않음')).toBe(false)
+  })
+})

@@ -56,7 +56,14 @@ const adjacentImplicits: VoyageModDef[] = [
   { id: 'adj-wisps-1', short: '2000 Wisps', text: 'Monsters have a chance to be Empowered by 2000 Wildwood Wisps', scope: 'adjacent', effects: [{ stat: 'wisps', percent: 30 }] },
   { id: 'adj-wisps-2', short: '4000 Wisps', text: 'Monsters have a chance to be Empowered by 4000 Wildwood Wisps', scope: 'adjacent', effects: [{ stat: 'wisps', percent: 55 }] },
   { id: 'adj-atziri', short: "Atziri's Influence", text: "Atziri's Influence", scope: 'adjacent', effects: [{ stat: 'treasure', percent: 40 }] },
-  { id: 'adj-gold-1', text: '40% of Equipment dropped by Monsters in Area is converted to Gold', scope: 'adjacent', effects: [{ stat: 'gold', percent: 40 }] },
+  {
+    id: 'adj-gold-1',
+    text: '40% of Equipment dropped by Monsters in Area is converted to Gold',
+    // Korean-client clipboard sample supplied by a player.
+    aliases: ['인접 지역 내 몬스터가 떨어뜨리는 장비의 40%가 골드로 전환'],
+    scope: 'adjacent',
+    effects: [{ stat: 'gold', percent: 40 }],
+  },
   { id: 'adj-gold-2', text: '80% of Equipment dropped by Monsters in Area is converted to Gold', scope: 'adjacent', effects: [{ stat: 'gold', percent: 80 }] },
   { id: 'adj-spirit-1', short: '+1 Spirit Cage', text: 'Adjacent Areas contain an additional cage of Tormented Spirits', scope: 'adjacent', effects: [{ stat: 'spirits', percent: 20 }] },
   { id: 'adj-spirit-2', short: '+2 Spirit Cages', text: 'Adjacent Areas contain 2 additional cages of Tormented Spirits', scope: 'adjacent', effects: [{ stat: 'spirits', percent: 38 }] },

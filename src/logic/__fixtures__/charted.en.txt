@@ -1,0 +1,20 @@
+Item Class: Chart
+Rarity: Magic
+Armoured Coral Reef Chart of Ice
+--------
+Undersea Groves
+Area Level: 63
+Item Quantity: +20% (augmented)
+Gold Found: +50% (augmented)
+--------
+Item Level: 63
+--------
+{ Implicit Modifier }
+20% increased Dead Man's Sulphur found in this Area
+--------
+Chart Shape: Corner
+--------
+{ Prefix Modifier "Armoured" (Tier: 1) }
++8% Monster Physical Damage Reduction
+--------
+Take this item to Valerie to begin a Voyage.

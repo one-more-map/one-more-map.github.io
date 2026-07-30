@@ -1,29 +1,8 @@
 // Chart item-text importer, built against the real PoE 3.29 chart format.
 //
-// Real format (uncharted example):
-//   Item Class: Chart
-//   Rarity: Magic
-//   Armoured Coral Reef Chart of Ice        <- name
-//   --------
-//   Seafloor Ridges                          <- deepwater area type
-//   Area Level: 63
-//   Item Quantity: +20% (augmented)          <- header reward stats (aggregated)
-//   Gold Found: +50% (augmented)
-//   --------
-//   Item Level: 63
-//   --------
-//   { Implicit Modifier }
-//   Voyage Modifier will be revealed once Charted   <- hidden until Charted
-//   --------
-//   Chart Shape: Straight                    <- connector shape
-//   --------
-//   { Prefix Modifier "Armoured" ... }
-//   +8% Monster Physical Damage Reduction    <- explicit downsides
-//   --------
-//   Take this item to Valerie ...
-//
-// Charts must be Charted (implicit revealed) to be useful, so uncharted charts
-// are rejected on import.
+// Localization is handled at this parser boundary. Stored modifier ids and
+// shape names remain canonical so scoring, strategies and saved state do not
+// need to know which client language produced the clipboard text.
 
 import { VOYAGE_MODS } from '../data/mods'
 import type { ChartData, Edges, ModEffect, Stat } from '../types'
@@ -34,31 +13,123 @@ export function newUid(): string {
   return `c${Date.now().toString(36)}-${uidCounter}`
 }
 
-/** Chart Shape name -> connector edges [N,E,S,W]. Orientation is arbitrary
- *  (the solver can rotate); only the count/arrangement matters. */
-const SHAPE_EDGES: Record<string, Edges> = {
-  end: [true, false, false, false], // 1 connector
-  corner: [true, true, false, false], // 2 adjacent (L)
-  straight: [true, false, true, false], // 2 opposite (line)
-  junction: [true, true, true, false], // 3 connectors (T)
-  crossing: [true, true, true, true], // 4 connectors (+)
-  crossroads: [true, true, true, true], // alias
-  cross: [true, true, true, true], // alias
+interface ShapeDefinition {
+  canonical: string
+  edges: Edges
 }
 
-/** header "quality" reward stats -> our Stat, matched by their labels */
-const HEADER_STATS: { re: RegExp; stat: Stat }[] = [
-  { re: /Item Quantity:\s*\+?(\d+)%/i, stat: 'quantity' },
-  { re: /Item Rarity:\s*\+?(\d+)%/i, stat: 'rarity' },
-  { re: /Gold Found:\s*\+?(\d+)%/i, stat: 'gold' },
-  { re: /Dead Man's Sulphur:\s*\+?(\d+)%/i, stat: 'sulphur' },
-  { re: /Pack Size:\s*\+?(\d+)%/i, stat: 'packsize' },
-  { re: /Scarabs Found:\s*\+?(\d+)%/i, stat: 'scarabs' },
-  { re: /Currency Found:\s*\+?(\d+)%/i, stat: 'currency' },
-]
+interface HeaderStat {
+  re: RegExp
+  stat: Stat
+}
+
+interface ClipboardDialect {
+  itemClass: RegExp
+  chartClass: RegExp
+  rarity: RegExp
+  areaLevel: RegExp
+  shape: RegExp
+  shapeLabel: string
+  implicitMarker: RegExp
+  uncharted?: RegExp
+  headerStats: HeaderStat[]
+  shapes: Record<string, ShapeDefinition>
+  structural: RegExp
+  rewardRider: RegExp
+}
+
+/** Connector edges are [N,E,S,W]. Orientation is arbitrary because the solver
+ * can rotate charts; only connector count and arrangement matter. */
+const END: ShapeDefinition = { canonical: 'End', edges: [true, false, false, false] }
+const CORNER: ShapeDefinition = { canonical: 'Corner', edges: [true, true, false, false] }
+const STRAIGHT: ShapeDefinition = { canonical: 'Straight', edges: [true, false, true, false] }
+const JUNCTION: ShapeDefinition = { canonical: 'Junction', edges: [true, true, true, false] }
+const CROSSING: ShapeDefinition = { canonical: 'Crossing', edges: [true, true, true, true] }
+
+const ENGLISH_DIALECT: ClipboardDialect = {
+  itemClass: /^[ \t]*Item Class\s*[:：]/im,
+  chartClass: /^[ \t]*Item Class\s*[:：]\s*Chart[ \t]*$/im,
+  rarity: /^Rarity\s*[:：]/i,
+  areaLevel: /^Area Level\s*[:：]\s*(\d+)\s*$/im,
+  shape: /^Chart Shape\s*[:：]\s*(.+?)\s*$/im,
+  shapeLabel: 'Chart Shape',
+  implicitMarker: /^\{\s*Implicit Modifier\s*\}$/i,
+  uncharted: /Voyage Modifier will be revealed once Charted/i,
+  headerStats: [
+    { re: /Item Quantity:\s*\+?(\d+)%/i, stat: 'quantity' },
+    { re: /Item Rarity:\s*\+?(\d+)%/i, stat: 'rarity' },
+    { re: /Gold Found:\s*\+?(\d+)%/i, stat: 'gold' },
+    { re: /Dead Man's Sulphur:\s*\+?(\d+)%/i, stat: 'sulphur' },
+    { re: /Pack Size:\s*\+?(\d+)%/i, stat: 'packsize' },
+    { re: /Scarabs Found:\s*\+?(\d+)%/i, stat: 'scarabs' },
+    { re: /Currency Found:\s*\+?(\d+)%/i, stat: 'currency' },
+  ],
+  shapes: {
+    end: END,
+    corner: CORNER,
+    straight: STRAIGHT,
+    junction: JUNCTION,
+    crossing: CROSSING,
+    crossroads: CROSSING,
+    cross: CROSSING,
+  },
+  structural:
+    /^(?:Item Class\s*[:：]|Rarity\s*[:：]|Area Level\s*[:：]|Item Level\s*[:：]|Requires|Chart Shape\s*[:：]|Take this item|Seafloor|Abyssal|Undersea|Anchorfield|Kishara)/i,
+  rewardRider: /found in this Area/i,
+}
+
+const KOREAN_DIALECT: ClipboardDialect = {
+  itemClass: /^[ \t]*아이템 종류\s*[:：]/im,
+  chartClass: /^[ \t]*아이템 종류\s*[:：]\s*해도[ \t]*$/im,
+  rarity: /^아이템 희귀도\s*[:：]/i,
+  areaLevel: /^지역 레벨\s*[:：]\s*(\d+)\s*$/im,
+  shape: /^해도 형태\s*[:：]\s*(.+?)\s*$/im,
+  shapeLabel: '해도 형태',
+  implicitMarker: /^\{\s*고정 속성 부여\s*\}$/i,
+  headerStats: [
+    { re: /아이템 수량\s*[:：]\s*\+?(\d+)%/i, stat: 'quantity' },
+    { re: /아이템 희귀도\s*[:：]\s*\+?(\d+)%/i, stat: 'rarity' },
+    { re: /골드 발견량\s*[:：]\s*\+?(\d+)%/i, stat: 'gold' },
+    { re: /망자의 유황\s*[:：]\s*\+?(\d+)%/i, stat: 'sulphur' },
+    { re: /몬스터 무리 규모\s*[:：]\s*\+?(\d+)%/i, stat: 'packsize' },
+  ],
+  shapes: {
+    끄트머리: END,
+    모서리: CORNER,
+    직선: STRAIGHT,
+    접점: JUNCTION,
+    교차: CROSSING,
+  },
+  structural:
+    /^(?:아이템 종류\s*[:：]|아이템 희귀도\s*[:：]|지역 레벨\s*[:：]|아이템 레벨\s*[:：]|요구사항\s*[:：]?|레벨\s*[:：]\s*\d+|해도 형태\s*[:：]|이 지역을 해도로 기록하려면)/i,
+  rewardRider: /^이 지역에서 발견하는 .*\d+%\s*증가$/i,
+}
+
+const DIALECTS = [ENGLISH_DIALECT, KOREAN_DIALECT]
+const ITEM_START_RE = /(?=^[ \t]*(?:Item Class|아이템 종류)\s*[:：])/gim
+const SEPARATOR_RE = /^-{3,}$/
+
+function normalizeClipboardText(text: string): string {
+  return text.replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n')
+}
+
+function normalizeLookupText(text: string): string {
+  return text.normalize('NFKC').toLowerCase().replace(/\s+/g, ' ').trim()
+}
+
+function dialectForItem(item: string): ClipboardDialect | undefined {
+  return DIALECTS.find((dialect) => dialect.itemClass.test(item))
+}
+
+/** True when clipboard text contains an English or Korean Chart class header. */
+export function isChartClipboardText(text: string): boolean {
+  const normalized = normalizeClipboardText(text)
+  return DIALECTS.some((dialect) => dialect.chartClass.test(normalized))
+}
 
 // Common filler words dropped when matching, so wording/pluralisation/number
-// differences between the game text and our stored text don't block a match.
+// differences between the game text and our stored English text do not block a
+// match.
 const STOP = new Set(
   (
     'a an the of in on to be by and or per this that all are is it as at with for ' +
@@ -70,7 +141,7 @@ const STOP = new Set(
 const stem = (w: string): string => w.replace(/(es|s)$/, '')
 
 /** Levenshtein distance, capped early - used to tolerate the game's own typos
- *  (e.g. the "Qauntity of Items" voyage mod is misspelled in-game). */
+ * (e.g. the "Qauntity of Items" voyage mod is misspelled in-game). */
 function editDistance(a: string, b: string): number {
   const m = a.length
   const n = b.length
@@ -87,8 +158,7 @@ function editDistance(a: string, b: string): number {
   return prev[n]
 }
 
-/** does the line contain this mod keyword, allowing a near-miss for long words
- *  (covers in-game typos and minor plural/tense drift not caught by stemming)? */
+/** Does the line contain this mod keyword, allowing a near-miss for long words? */
 function fuzzyHas(lineWords: Set<string>, w: string): boolean {
   if (lineWords.has(w)) return true
   if (w.length < 5) return false
@@ -99,12 +169,12 @@ function fuzzyHas(lineWords: Set<string>, w: string): boolean {
   return false
 }
 
-/** distinctive keywords of a mod line (lowercase, stemmed, filler removed) */
+/** Distinctive English keywords of a mod line (stemmed, filler removed). */
 function sigWords(s: string): string[] {
   const out = new Set<string>()
   for (const w of s
     .toLowerCase()
-    .replace(/\([^)]*\)/g, ' ') // drop "(8-10)" value ranges
+    .replace(/\([^)]*\)/g, ' ')
     .replace(/[^a-z ]+/g, ' ')
     .split(/\s+/)) {
     if (w.length >= 3 && !STOP.has(w)) out.add(stem(w))
@@ -112,9 +182,24 @@ function sigWords(s: string): string[] {
   return [...out]
 }
 
-/** Match a revealed implicit line against the adjacent/voyage mod pool by
- *  keyword overlap, tie-broken by specificity then closest tier value. */
+function matchLocalizedAlias(line: string): string | null {
+  const normalized = normalizeLookupText(line)
+  const matchingIds = new Set<string>()
+  for (const mod of VOYAGE_MODS) {
+    if (mod.scope === 'self') continue
+    if (mod.aliases?.some((alias) => normalizeLookupText(alias) === normalized)) {
+      matchingIds.add(mod.id)
+    }
+  }
+  return matchingIds.size === 1 ? [...matchingIds][0] : null
+}
+
+/** Match a revealed implicit line against localized aliases first, then retain
+ * the existing English fuzzy matcher and its tie-breaking behaviour. */
 function matchImplicit(line: string): string | null {
+  const aliasId = matchLocalizedAlias(line)
+  if (aliasId) return aliasId
+
   const lineWords = new Set(sigWords(line))
   if (lineWords.size === 0) return null
   const lineNum = parseFloat(line.replace(/\([^)]*\)/g, ' ').match(/\d+/)?.[0] ?? '')
@@ -128,7 +213,7 @@ function matchImplicit(line: string): string | null {
   if (scored.length === 0) return null
   scored.sort((a, b) => {
     if (b.ratio !== a.ratio) return b.ratio - a.ratio
-    if (b.mwLen !== a.mwLen) return b.mwLen - a.mwLen // prefer the more specific mod
+    if (b.mwLen !== a.mwLen) return b.mwLen - a.mwLen
     if (!isNaN(lineNum)) {
       const an = parseFloat(a.m.text.match(/\d+/)?.[0] ?? 'NaN')
       const bn = parseFloat(b.m.text.match(/\d+/)?.[0] ?? 'NaN')
@@ -146,8 +231,8 @@ export interface ParseResult {
 }
 
 export function parseChartText(text: string): ParseResult {
-  const items = text
-    .split(/\n(?=Item Class:)/g)
+  const items = normalizeClipboardText(text)
+    .split(ITEM_START_RE)
     .map((s) => s.trim())
     .filter(Boolean)
 
@@ -155,87 +240,105 @@ export function parseChartText(text: string): ParseResult {
   const rejected: { name: string; reason: string }[] = []
 
   for (const item of items) {
-    const lines = item.split('\n').map((l) => l.trim())
-    const nameIdx = lines.findIndex((l) => /^Rarity:/i.test(l))
-    // The item name spans every line between the Rarity line and the first
-    // separator - Rare charts copy as two lines (rare name + base type), e.g.
-    // "Aquatic Trek" / "Coral Forest Chart"; Magic/Normal are a single line.
+    const dialect = dialectForItem(item)
+    const lines = item.split('\n').map((line) => line.trim())
+    const nameIdx = dialect ? lines.findIndex((line) => dialect.rarity.test(line)) : -1
+
+    // Rare chart names span two lines (rare name + base type); Magic and Normal
+    // chart names occupy one line. Keep every line up to the first separator.
     const nameLineIdxs: number[] = []
     if (nameIdx >= 0) {
-      for (let i = nameIdx + 1; i < lines.length && !/^-{3,}$/.test(lines[i]); i++) {
+      for (let i = nameIdx + 1; i < lines.length && !SEPARATOR_RE.test(lines[i]); i++) {
         if (lines[i]) nameLineIdxs.push(i)
       }
     }
     const name = nameLineIdxs.length
-      ? nameLineIdxs.map((i) => lines[i]).join(' ')
+      ? nameLineIdxs.map((index) => lines[index]).join(' ')
       : 'Unknown Chart'
 
-    if (!/Item Class:\s*Chart/i.test(item)) {
+    if (!dialect || !dialect.chartClass.test(item)) {
       rejected.push({ name, reason: 'not a Chart item' })
       continue
     }
 
-    // uncharted: implicit not yet revealed -> reject
-    if (/Voyage Modifier will be revealed once Charted/i.test(item)) {
+    if (dialect.uncharted?.test(item)) {
       rejected.push({ name, reason: 'not charted yet (run it first to reveal its modifier)' })
       continue
     }
 
-    const level = parseInt(item.match(/Area Level:\s*(\d+)/i)?.[1] ?? '80', 10)
+    // Preserve the existing fallback for malformed/older English input.
+    const level = parseInt(item.match(dialect.areaLevel)?.[1] ?? '80', 10)
 
-    // header reward stats (aggregated totals shown as "Stat: +N%")
     const rewards: ModEffect[] = []
-    for (const { re, stat } of HEADER_STATS) {
-      const m = item.match(re)
-      if (m) rewards.push({ stat, percent: parseInt(m[1], 10) })
+    for (const { re, stat } of dialect.headerStats) {
+      const match = item.match(re)
+      if (match) rewards.push({ stat, percent: parseInt(match[1], 10) })
     }
 
-    // connector shape
-    const shapeName = item.match(/Chart Shape:\s*([A-Za-z]+)/i)?.[1] ?? ''
-    const edges: Edges = SHAPE_EDGES[shapeName.toLowerCase()] ?? [true, true, true, true]
+    const shapeMatch = item.match(dialect.shape)
+    const shapeName = shapeMatch?.[1].trim() ?? ''
+    if (!shapeName) {
+      rejected.push({ name, reason: `missing ${dialect.shapeLabel}` })
+      continue
+    }
+    const shape = dialect.shapes[normalizeLookupText(shapeName)]
+    if (!shape) {
+      rejected.push({ name, reason: `unknown ${dialect.shapeLabel}: ${shapeName}` })
+      continue
+    }
 
-    // revealed implicit: the line under "{ Implicit Modifier }"
+    // The revealed implicit is the line under the locale's modifier marker.
+    // Unknown modifiers are still imported with their verbatim text preserved.
     const modIds: string[] = []
     let implicitText: string | undefined
-    const implicitIdx = lines.findIndex((l) => /\{\s*Implicit Modifier\s*\}/i.test(l))
+    const implicitIdx = lines.findIndex((line) => dialect.implicitMarker.test(line))
     if (implicitIdx >= 0) {
       const implicitLine = lines[implicitIdx + 1] ?? ''
-      if (implicitLine && !/^-{3,}$/.test(implicitLine)) {
+      if (implicitLine && !SEPARATOR_RE.test(implicitLine)) {
         implicitText = implicitLine
         const id = matchImplicit(implicitLine)
         if (id) modIds.push(id)
       }
     }
 
-    // keep explicit downside lines as raw text (their reward part is already in
-    // the header aggregate, so we do not score them again). Structural filter:
-    // anything that is not a section marker, header field, {modifier header},
-    // parenthetical note, header reward stat, or a "found in this Area" reward.
-    const structural =
-      /^(-{3,}|Item Class:|Rarity:|Area Level:|Item Level:|Requires|Chart Shape:|Take this item|Seafloor|Abyssal|Undersea|Anchorfield|Kishara)/i
+    const areaLevelIdx = lines.findIndex((line) => dialect.areaLevel.test(line))
+    const areaTypeLineIndexes = new Set<number>()
+    for (let i = areaLevelIdx - 1; i >= 0; i--) {
+      if (SEPARATOR_RE.test(lines[i])) {
+        for (let j = i + 1; j < areaLevelIdx; j++) {
+          if (lines[j]) areaTypeLineIndexes.add(j)
+        }
+        break
+      }
+    }
+
+    // Keep explicit downside lines as raw text. Header fields, localized area
+    // names and self-reward riders are structural and should not be duplicated.
     const nameLineSet = new Set(nameLineIdxs)
     const rawLines = lines.filter(
-      (l, idx) =>
-        l &&
-        !nameLineSet.has(idx) && // not any name line (rare charts span two)
-        idx !== implicitIdx + 1 && // not the implicit line (already parsed)
-        !structural.test(l) &&
-        !/^\{.*\}$/.test(l) && // not a { modifier } header
-        !l.startsWith('(') && // not a parenthetical explanation
-        !/:\s*\+?\d+%/.test(l) && // not a header reward stat
-        !/found in this Area/i.test(l) && // reward rider already in header
-        !/Voyage Modifier will be revealed/i.test(l),
+      (line, index) =>
+        line &&
+        !nameLineSet.has(index) &&
+        !areaTypeLineIndexes.has(index) &&
+        index !== implicitIdx + 1 &&
+        !SEPARATOR_RE.test(line) &&
+        !dialect.structural.test(line) &&
+        !/^\{.*\}$/.test(line) &&
+        !line.startsWith('(') &&
+        !/[:：]\s*\+?\d+%/.test(line) &&
+        !dialect.rewardRider.test(line) &&
+        !(dialect.uncharted?.test(line) ?? false),
     )
 
     charts.push({
       uid: newUid(),
       name,
       level,
-      edges,
+      edges: shape.edges,
       modIds,
       implicitText,
       rewards: rewards.length ? rewards : undefined,
-      shape: shapeName || undefined,
+      shape: shape.canonical,
       rawText: rawLines.length ? rawLines.join('\n') : undefined,
     })
   }
