@@ -3,6 +3,7 @@ import type { ChartData, Edges } from '../types'
 import englishChart from './__fixtures__/charted.en.txt?raw'
 import koreanChart from './__fixtures__/charted.ko.txt?raw'
 import koreanImplicitAliases from './__fixtures__/implicit-aliases.ko.tsv?raw'
+import koreanNumericTierAliases from './__fixtures__/numeric-tier-aliases.ko.tsv?raw'
 import koreanUncharted from './__fixtures__/uncharted.ko.txt?raw'
 import { isChartClipboardText, parseChartText } from './parser'
 
@@ -24,6 +25,17 @@ const koreanImplicitAliasCases: KoreanImplicitAliasCase[] = koreanImplicitAliase
       throw new Error(`Malformed Korean implicit alias fixture row: ${line}`)
     }
     return { rawText, modId, occurrences: Number(occurrencesText) }
+  })
+
+const koreanNumericTierAliasCases = koreanNumericTierAliases
+  .split(/\r?\n/)
+  .filter((line) => line && !line.startsWith('#'))
+  .map((line) => {
+    const [rawText, modId] = line.split('\t')
+    if (!rawText || !modId) {
+      throw new Error(`Malformed Korean numeric-tier alias fixture row: ${line}`)
+    }
+    return { rawText, modId }
   })
 
 function parseOnlyChart(text: string): ChartData {
@@ -222,6 +234,28 @@ describe('parseChartText', () => {
           rawText,
         ).toEqual([modId])
       }
+    }
+  })
+
+  it('maps player-confirmed Korean numeric-tier variants without treating them as corpus observations', () => {
+    expect(koreanNumericTierAliasCases).toHaveLength(12)
+
+    for (const { rawText, modId } of koreanNumericTierAliasCases) {
+      const chart = parseOnlyChart(koreanChart.replace(KOREAN_CHARTED_IMPLICIT, rawText))
+      expect(chart.modIds, rawText).toEqual([modId])
+      expect(chart.implicitText, rawText).toBe(rawText)
+    }
+
+    const alternateCurrentRolls = [
+      ['인접 지역들에 갇힌 몬스터 2(1-2)마리 추가 등장', 'adj-ess-1'],
+      ['인접 지역들에 문어 무리 14(11-14)개 추가 등장', 'adj-octo-2'],
+    ] as const
+
+    for (const [rawText, modId] of alternateCurrentRolls) {
+      expect(
+        parseOnlyChart(koreanChart.replace(KOREAN_CHARTED_IMPLICIT, rawText)).modIds,
+        rawText,
+      ).toEqual([modId])
     }
   })
 

@@ -1,0 +1,17 @@
+# Source: Korean-client player confirmation, 2026-07-31.
+# The player confirmed that a previously supplied sentence template remains
+# exact across modifier tiers when only its numeric values change. These are
+# player-confirmed numeric variants, not independent clipboard observations.
+# Format: expected implicit text<TAB>canonical id
+인접 지역들에 갇힌 몬스터 1(1-2)마리 추가 등장	adj-ess-1
+인접 지역들에 갇힌 몬스터 5마리 추가 등장	adj-ess-3
+인접 지역들에 금고 1개 추가 등장	adj-box-1
+인접 지역들에 금고 5개 추가 등장	adj-box-3
+인접 지역들에 문어 무리 11(11-14)개 추가 등장	adj-octo-2
+몬스터가 일정 확률로 야생림 도깨비불 4000마리로 강화	adj-wisps-2
+인접 지역들에 신비학자의 금고 3개 추가 등장	adj-arcbox-2
+인접 지역들에서 떨어지는 목걸이가 20% 확률로 고유 목걸이로 떨어짐	adj-uamu-2
+인접 지역들에서 떨어지는 허리띠가 10% 확률로 고유 허리띠로 떨어짐	adj-ubelt-1
+모든 항해 지역에서 발견하는 아이템 수량 10% 증가	voy-quant-2
+모든 항해 지역에서 발견하는 아이템 희귀도 9% 증가	voy-rarity-2
+모든 항해 지역에서 발견하는 망자의 유황 25% 증가	voy-sulph-3

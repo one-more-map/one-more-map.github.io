@@ -35,15 +35,17 @@ const chartMapMods: VoyageModDef[] = [
 // ---------------------------------------------------------------------------
 // Chart implicits - Adjacent pool (revealed on charting)
 // ---------------------------------------------------------------------------
-// Korean aliases are verbatim Ctrl+C lines observed in a 60-chart Korean-client
-// corpus supplied by a player; no unobserved wording is inferred.
+// Korean aliases are either verbatim Ctrl+C lines observed in a 60-chart
+// Korean-client corpus, or numeric-tier variants explicitly confirmed by that
+// player to use the same localized sentence template. Tests keep those two
+// provenance groups separate.
 const adjacentImplicits: VoyageModDef[] = [
-  { id: 'adj-ess-1', short: '+1-2 Imprisoned', text: 'Adjacent Areas contain 1-2 additional Imprisoned Monsters', scope: 'adjacent', effects: [{ stat: 'essences', percent: 15 }] },
+  { id: 'adj-ess-1', short: '+1-2 Imprisoned', text: 'Adjacent Areas contain 1-2 additional Imprisoned Monsters', aliases: ['인접 지역들에 갇힌 몬스터 1(1-2)마리 추가 등장'], scope: 'adjacent', effects: [{ stat: 'essences', percent: 15 }] },
   { id: 'adj-ess-2', short: '+2-4 Imprisoned', text: 'Adjacent Areas contain 2-4 additional Imprisoned Monsters', aliases: ['인접 지역들에 갇힌 몬스터 4(2-4)마리 추가 등장'], scope: 'adjacent', effects: [{ stat: 'essences', percent: 30 }] },
-  { id: 'adj-ess-3', short: '+5 Imprisoned', text: 'Adjacent Areas contain 5 additional Imprisoned Monsters', scope: 'adjacent', effects: [{ stat: 'essences', percent: 50 }] },
-  { id: 'adj-box-1', short: '+1 Strongbox', text: 'Adjacent Areas contain an additional Strongbox', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 15 }] },
+  { id: 'adj-ess-3', short: '+5 Imprisoned', text: 'Adjacent Areas contain 5 additional Imprisoned Monsters', aliases: ['인접 지역들에 갇힌 몬스터 5마리 추가 등장'], scope: 'adjacent', effects: [{ stat: 'essences', percent: 50 }] },
+  { id: 'adj-box-1', short: '+1 Strongbox', text: 'Adjacent Areas contain an additional Strongbox', aliases: ['인접 지역들에 금고 1개 추가 등장'], scope: 'adjacent', effects: [{ stat: 'treasure', percent: 15 }] },
   { id: 'adj-box-2', short: '+2-4 Strongboxes', text: 'Adjacent Areas contain 2-4 additional Strongboxes', aliases: ['인접 지역들에 금고 3(2-4)개 추가 등장'], scope: 'adjacent', effects: [{ stat: 'treasure', percent: 35 }] },
-  { id: 'adj-box-3', short: '+5 Strongboxes', text: 'Adjacent Areas contain 5 additional Strongboxes', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 55 }] },
+  { id: 'adj-box-3', short: '+5 Strongboxes', text: 'Adjacent Areas contain 5 additional Strongboxes', aliases: ['인접 지역들에 금고 5개 추가 등장'], scope: 'adjacent', effects: [{ stat: 'treasure', percent: 55 }] },
   {
     id: 'adj-octo-1',
     short: '+8-10 Octopi',
@@ -52,7 +54,7 @@ const adjacentImplicits: VoyageModDef[] = [
     scope: 'adjacent',
     effects: [{ stat: 'packsize', percent: 25 }],
   },
-  { id: 'adj-octo-2', short: '+11-14 Octopi', text: 'Adjacent Areas contain 11-14 additional packs of Octopi', scope: 'adjacent', effects: [{ stat: 'packsize', percent: 35 }] },
+  { id: 'adj-octo-2', short: '+11-14 Octopi', text: 'Adjacent Areas contain 11-14 additional packs of Octopi', aliases: ['인접 지역들에 문어 무리 11(11-14)개 추가 등장'], scope: 'adjacent', effects: [{ stat: 'packsize', percent: 35 }] },
   { id: 'adj-crab-1', short: '+8-10 Crabs', text: 'Adjacent Areas contain 8-10 additional packs of Crabs', scope: 'adjacent', effects: [{ stat: 'packsize', percent: 25 }] },
   { id: 'adj-crab-2', short: '+11-14 Crabs', text: 'Adjacent Areas contain 11-14 additional packs of Crabs', scope: 'adjacent', effects: [{ stat: 'packsize', percent: 35 }] },
   { id: 'adj-magic-1', text: '30% increased Magic Monsters', scope: 'adjacent', effects: [{ stat: 'magicmonsters', percent: 30 }] },
@@ -63,7 +65,7 @@ const adjacentImplicits: VoyageModDef[] = [
   { id: 'adj-msg-2', short: '+2 Messages', text: 'Adjacent Areas contain 2 additional Messages in Bottles', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 22 }] },
   { id: 'adj-fish', short: 'Exotic Fish', text: 'Adjacent Areas contain highly prized and exotic Fish', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 20 }] },
   { id: 'adj-wisps-1', short: '2000 Wisps', text: 'Monsters have a chance to be Empowered by 2000 Wildwood Wisps', aliases: ['몬스터가 일정 확률로 야생림 도깨비불 2000마리로 강화'], scope: 'adjacent', effects: [{ stat: 'wisps', percent: 30 }] },
-  { id: 'adj-wisps-2', short: '4000 Wisps', text: 'Monsters have a chance to be Empowered by 4000 Wildwood Wisps', scope: 'adjacent', effects: [{ stat: 'wisps', percent: 55 }] },
+  { id: 'adj-wisps-2', short: '4000 Wisps', text: 'Monsters have a chance to be Empowered by 4000 Wildwood Wisps', aliases: ['몬스터가 일정 확률로 야생림 도깨비불 4000마리로 강화'], scope: 'adjacent', effects: [{ stat: 'wisps', percent: 55 }] },
   { id: 'adj-atziri', short: "Atziri's Influence", text: "Atziri's Influence", scope: 'adjacent', effects: [{ stat: 'treasure', percent: 40 }] },
   {
     id: 'adj-gold-1',
@@ -78,7 +80,7 @@ const adjacentImplicits: VoyageModDef[] = [
   { id: 'adj-divbox-1', short: "+2 Diviner's Boxes", text: "Adjacent Areas contain 2 additional Diviner's Strongboxes", scope: 'adjacent', effects: [{ stat: 'divcards', percent: 45 }] },
   { id: 'adj-divbox-2', short: "+3 Diviner's Boxes", text: "Adjacent Areas contain 3 additional Diviner's Strongboxes", scope: 'adjacent', effects: [{ stat: 'divcards', percent: 65 }] },
   { id: 'adj-arcbox-1', short: '+2 Arcanist Boxes', text: "Adjacent Areas contain 2 additional Arcanist's Strongboxes", aliases: ['인접 지역들에 신비학자의 금고 2개 추가 등장'], scope: 'adjacent', effects: [{ stat: 'currency', percent: 40 }] },
-  { id: 'adj-arcbox-2', short: '+3 Arcanist Boxes', text: "Adjacent Areas contain 3 additional Arcanist's Strongboxes", scope: 'adjacent', effects: [{ stat: 'currency', percent: 55 }] },
+  { id: 'adj-arcbox-2', short: '+3 Arcanist Boxes', text: "Adjacent Areas contain 3 additional Arcanist's Strongboxes", aliases: ['인접 지역들에 신비학자의 금고 3개 추가 등장'], scope: 'adjacent', effects: [{ stat: 'currency', percent: 55 }] },
   { id: 'adj-opbox-1', short: '+2 Operative Boxes', text: "Adjacent Areas contain 2 additional Operative's Strongboxes", scope: 'adjacent', effects: [{ stat: 'scarabs', percent: 40 }] },
   { id: 'adj-opbox-2', short: '+3 Operative Boxes', text: "Adjacent Areas contain 3 additional Operative's Strongboxes", scope: 'adjacent', effects: [{ stat: 'scarabs', percent: 55 }] },
   {
@@ -111,8 +113,8 @@ const adjacentImplicits: VoyageModDef[] = [
   { id: 'adj-uring-1', short: '10% Unique Ring', text: 'Rings dropped in adjacent Areas have 10% chance to instead drop as a Unique Ring', scope: 'adjacent', effects: [{ stat: 'uniques', percent: 20 }] },
   { id: 'adj-uring-2', short: '20% Unique Ring', text: 'Rings dropped in adjacent Areas have 20% chance to instead drop as a Unique Ring', scope: 'adjacent', effects: [{ stat: 'uniques', percent: 40 }] },
   { id: 'adj-uamu-1', short: '10% Unique Amulet', text: 'Amulets dropped in adjacent Areas have 10% chance to instead drop as a Unique Amulet', aliases: ['인접 지역들에서 떨어지는 목걸이가 10% 확률로 고유 목걸이로 떨어짐'], scope: 'adjacent', effects: [{ stat: 'uniques', percent: 20 }] },
-  { id: 'adj-uamu-2', short: '20% Unique Amulet', text: 'Amulets dropped in adjacent Areas have 20% chance to instead drop as a Unique Amulet', scope: 'adjacent', effects: [{ stat: 'uniques', percent: 40 }] },
-  { id: 'adj-ubelt-1', short: '10% Unique Belt', text: 'Belts dropped in adjacent Areas have 10% chance to instead drop as a Unique Belt', scope: 'adjacent', effects: [{ stat: 'uniques', percent: 20 }] },
+  { id: 'adj-uamu-2', short: '20% Unique Amulet', text: 'Amulets dropped in adjacent Areas have 20% chance to instead drop as a Unique Amulet', aliases: ['인접 지역들에서 떨어지는 목걸이가 20% 확률로 고유 목걸이로 떨어짐'], scope: 'adjacent', effects: [{ stat: 'uniques', percent: 40 }] },
+  { id: 'adj-ubelt-1', short: '10% Unique Belt', text: 'Belts dropped in adjacent Areas have 10% chance to instead drop as a Unique Belt', aliases: ['인접 지역들에서 떨어지는 허리띠가 10% 확률로 고유 허리띠로 떨어짐'], scope: 'adjacent', effects: [{ stat: 'uniques', percent: 20 }] },
   { id: 'adj-ubelt-2', short: '20% Unique Belt', text: 'Belts dropped in adjacent Areas have 20% chance to instead drop as a Unique Belt', aliases: ['인접 지역들에서 떨어지는 허리띠가 20% 확률로 고유 허리띠로 떨어짐'], scope: 'adjacent', effects: [{ stat: 'uniques', percent: 40 }] },
 ]
 
@@ -124,13 +126,13 @@ const voyageImplicits: VoyageModDef[] = [
   { id: 'voy-pack-1', text: '5% increased Pack size', aliases: ['모든 항해 지역 내 무리 규모 5% 증가'], scope: 'global', effects: [{ stat: 'packsize', percent: 5 }] },
   { id: 'voy-pack-2', text: '7% increased Pack size', aliases: ['모든 항해 지역 내 무리 규모 7% 증가'], scope: 'global', effects: [{ stat: 'packsize', percent: 7 }] },
   { id: 'voy-quant-1', text: '8% increased Quantity of Items found in this Area', aliases: ['모든 항해 지역에서 발견하는 아이템 수량 8% 증가'], scope: 'global', effects: [{ stat: 'quantity', percent: 8 }] },
-  { id: 'voy-quant-2', text: '10% increased Quantity of Items found in this Area', scope: 'global', effects: [{ stat: 'quantity', percent: 10 }] },
+  { id: 'voy-quant-2', text: '10% increased Quantity of Items found in this Area', aliases: ['모든 항해 지역에서 발견하는 아이템 수량 10% 증가'], scope: 'global', effects: [{ stat: 'quantity', percent: 10 }] },
   { id: 'voy-rarity-1', text: '7% increased Rarity of Items found in this Area', aliases: ['모든 항해 지역에서 발견하는 아이템 희귀도 7% 증가'], scope: 'global', effects: [{ stat: 'rarity', percent: 7 }] },
-  { id: 'voy-rarity-2', text: '9% increased Rarity of Items found in this Area', scope: 'global', effects: [{ stat: 'rarity', percent: 9 }] },
+  { id: 'voy-rarity-2', text: '9% increased Rarity of Items found in this Area', aliases: ['모든 항해 지역에서 발견하는 아이템 희귀도 9% 증가'], scope: 'global', effects: [{ stat: 'rarity', percent: 9 }] },
   { id: 'voy-jelly', short: 'Friendly Jellyfish', text: 'All Voyage Areas contain Friendly Jellyfish', aliases: ['지역에 살가운 해파리 등장'], scope: 'global', effects: [] },
   { id: 'voy-sulph-1', text: "15% increased Dead Man's Sulphur found in this Area", aliases: ['모든 항해 지역에서 발견하는 망자의 유황 15% 증가'], scope: 'global', effects: [{ stat: 'sulphur', percent: 15 }] },
   { id: 'voy-sulph-2', text: "20% increased Dead Man's Sulphur found in this Area", aliases: ['모든 항해 지역에서 발견하는 망자의 유황 20% 증가'], scope: 'global', effects: [{ stat: 'sulphur', percent: 20 }] },
-  { id: 'voy-sulph-3', text: "25% increased Dead Man's Sulphur found in this Area", scope: 'global', effects: [{ stat: 'sulphur', percent: 25 }] },
+  { id: 'voy-sulph-3', text: "25% increased Dead Man's Sulphur found in this Area", aliases: ['모든 항해 지역에서 발견하는 망자의 유황 25% 증가'], scope: 'global', effects: [{ stat: 'sulphur', percent: 25 }] },
   { id: 'voy-rare', text: '25% increased number of Rare Monsters', aliases: ['모든 항해 지역 내 희귀 몬스터 수 25% 증가'], scope: 'global', effects: [{ stat: 'rares', percent: 25 }] },
   { id: 'voy-magic', text: '25% increased Magic Monsters', aliases: ['모든 항해 지역 내 마법 몬스터 수 25% 증가'], scope: 'global', effects: [{ stat: 'magicmonsters', percent: 25 }] },
   { id: 'voy-noequip', short: 'No Equipment Drops', text: 'Monsters in all Voyage Areas cannot drop Equipment, Flasks or Tinctures', scope: 'global', effects: [] },
