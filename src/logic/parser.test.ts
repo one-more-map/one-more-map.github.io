@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { ChartData, Edges } from '../types'
 import englishChart from './__fixtures__/charted.en.txt?raw'
 import koreanChart from './__fixtures__/charted.ko.txt?raw'
+import latestKoreanCharts from './__fixtures__/charted.latest.ko.txt?raw'
 import koreanImplicitAliases from './__fixtures__/implicit-aliases.ko.tsv?raw'
 import koreanNumericTierAliases from './__fixtures__/numeric-tier-aliases.ko.tsv?raw'
 import koreanUncharted from './__fixtures__/uncharted.ko.txt?raw'
@@ -84,6 +85,58 @@ describe('parseChartText', () => {
     expect(chart.rawText).toContain('몬스터가 19(15-20)%의 추가 물리 피해를 냉기 속성으로 가함')
     expect(chart.rawText).not.toContain('해저 마루')
     expect(chart.rawText).not.toContain('이 지역에서 발견하는 망자의 유황 30% 증가')
+  })
+
+  it('imports the three latest Korean-client charts as a batch', () => {
+    const result = parseChartText(latestKoreanCharts)
+
+    expect(result.rejected).toEqual([])
+    expect(result.charts).toHaveLength(3)
+    expect(result.charts[0]).toMatchObject({
+      name: '뱃사람의 항해 산호 숲 해도',
+      level: 83,
+      shape: 'Straight',
+      modIds: ['adj-magic-1'],
+    })
+    expect(result.charts[0].rewards).toHaveLength(3)
+    expect(result.charts[0].rewards).toEqual(
+      expect.arrayContaining([
+        { stat: 'packsize', percent: 36 },
+        { stat: 'gold', percent: 50 },
+        { stat: 'sulphur', percent: 75 },
+      ]),
+    )
+    expect(result.charts[0].rawText).toContain(
+      '몬스터가 물리 피해의 25(21-29)%를 추가 카오스 피해로 획득',
+    )
+    expect(result.charts[1]).toMatchObject({
+      name: '염수 기행 산호 숲 해도',
+      level: 83,
+      shape: 'Crossing',
+      modIds: ['adj-divbox-2'],
+    })
+    expect(result.charts[1].rewards).toHaveLength(3)
+    expect(result.charts[1].rewards).toEqual(
+      expect.arrayContaining([
+        { stat: 'quantity', percent: 55 },
+        { stat: 'rarity', percent: 38 },
+        { stat: 'sulphur', percent: 60 },
+      ]),
+    )
+    expect(result.charts[1].rawText).toContain(
+      '몬스터의 물리 피해 감소 +32(21-35)%',
+    )
+    expect(result.charts[2]).toMatchObject({
+      name: '해양의 항해 산호 암초 해도',
+      level: 83,
+      shape: 'Junction',
+      modIds: ['adj-crab-1'],
+      rewards: [
+        { stat: 'quantity', percent: 150 },
+        { stat: 'packsize', percent: 18 },
+      ],
+    })
+    expect(result.charts[2].implicitText).toBe('인접 지역에 게 무리 8(8-10)개 추가 등장')
   })
 
   it('parses the Korean Gold Found header observed in supplied clipboard text', () => {
@@ -190,9 +243,9 @@ describe('parseChartText', () => {
   })
 
   it('maps all observed Korean implicit lines to canonical ids without changing raw text', () => {
-    expect(koreanImplicitAliasCases).toHaveLength(35)
-    expect(koreanImplicitAliasCases.reduce((sum, entry) => sum + entry.occurrences, 0)).toBe(60)
-    expect(new Set(koreanImplicitAliasCases.map(({ modId }) => modId)).size).toBe(31)
+    expect(koreanImplicitAliasCases).toHaveLength(38)
+    expect(koreanImplicitAliasCases.reduce((sum, entry) => sum + entry.occurrences, 0)).toBe(63)
+    expect(new Set(koreanImplicitAliasCases.map(({ modId }) => modId)).size).toBe(34)
 
     for (const { rawText, modId } of koreanImplicitAliasCases) {
       const chart = parseOnlyChart(koreanChart.replace(KOREAN_CHARTED_IMPLICIT, rawText))
@@ -219,6 +272,7 @@ describe('parseChartText', () => {
         '인접 지역들에 통 무더기 17(16-20)개 추가 등장',
         '인접 지역들에 통 무더기 18(16-20)개 추가 등장',
       ],
+      'adj-crab-1': ['인접 지역에 게 무리 8(8-10)개 추가 등장'],
     }
 
     for (const [modId, rawTexts] of Object.entries(rangedVariants)) {
@@ -238,7 +292,7 @@ describe('parseChartText', () => {
   })
 
   it('maps player-confirmed Korean numeric-tier variants without treating them as corpus observations', () => {
-    expect(koreanNumericTierAliasCases).toHaveLength(12)
+    expect(koreanNumericTierAliasCases).toHaveLength(15)
 
     for (const { rawText, modId } of koreanNumericTierAliasCases) {
       const chart = parseOnlyChart(koreanChart.replace(KOREAN_CHARTED_IMPLICIT, rawText))
@@ -249,6 +303,8 @@ describe('parseChartText', () => {
     const alternateCurrentRolls = [
       ['인접 지역들에 갇힌 몬스터 2(1-2)마리 추가 등장', 'adj-ess-1'],
       ['인접 지역들에 문어 무리 14(11-14)개 추가 등장', 'adj-octo-2'],
+      ['인접 지역에 게 무리 10(8-10)개 추가 등장', 'adj-crab-1'],
+      ['인접 지역에 게 무리 14(11-14)개 추가 등장', 'adj-crab-2'],
     ] as const
 
     for (const [rawText, modId] of alternateCurrentRolls) {

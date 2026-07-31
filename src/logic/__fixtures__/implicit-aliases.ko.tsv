@@ -1,4 +1,4 @@
-# Source: user-provided Korean Path of Exile Ctrl+C clipboard text, 2026-07-31.
+# Source: user-provided Korean Path of Exile Ctrl+C clipboard text, 2026-07-31 through 2026-08-01.
 # Only line endings were normalized. These lines are not derived from an external catalog.
 # Format: verbatim implicit text<TAB>canonical id<TAB>observed count
 인접 지역들 내 희귀 몬스터 수 30% 증가	adj-rare-1	4
@@ -36,3 +36,6 @@
 인접 지역들에 신비학자의 금고 2개 추가 등장	adj-arcbox-1	1
 인접 지역들에 고통받는 혼백의 창살 2개 추가 등장	adj-spirit-2	1
 인접 지역들에 통 무더기 15(12-15)개 추가 등장	adj-barrel-1	1
+인접 지역들 내 마법 몬스터 수 30% 증가	adj-magic-1	1
+인접 지역들에 예언자의 금고 3개 추가 등장	adj-divbox-2	1
+인접 지역에 게 무리 8(8-10)개 추가 등장	adj-crab-1	1

@@ -1,4 +1,4 @@
-# Source: Korean-client player confirmation, 2026-07-31.
+# Source: Korean-client player confirmations, 2026-07-31 through 2026-08-01.
 # The player confirmed that a previously supplied sentence template remains
 # exact across modifier tiers when only its numeric values change. These are
 # player-confirmed numeric variants, not independent clipboard observations.
@@ -15,3 +15,6 @@
 모든 항해 지역에서 발견하는 아이템 수량 10% 증가	voy-quant-2
 모든 항해 지역에서 발견하는 아이템 희귀도 9% 증가	voy-rarity-2
 모든 항해 지역에서 발견하는 망자의 유황 25% 증가	voy-sulph-3
+인접 지역들 내 마법 몬스터 수 60% 증가	adj-magic-2
+인접 지역들에 예언자의 금고 2개 추가 등장	adj-divbox-1
+인접 지역에 게 무리 11(11-14)개 추가 등장	adj-crab-2
