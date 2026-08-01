@@ -74,10 +74,10 @@ function resolveRuleCells(rule: PositionRule, borders: Borders): number[] {
   return []
 }
 
-/** does this chart satisfy the rule's mod/name matcher? */
+/** does this chart satisfy the rule's modifier or destination matcher? */
 function chartMatchesRule(chart: ChartData, rule: PositionRule): boolean {
   if (rule.modIds && chart.modIds.some((id) => rule.modIds!.includes(id))) return true
-  if (rule.nameMatch && chart.name.toLowerCase().includes(rule.nameMatch.toLowerCase())) return true
+  if (rule.areaTypes && chart.areaType && rule.areaTypes.includes(chart.areaType)) return true
   return false
 }
 
@@ -255,7 +255,7 @@ function hillClimb(
       //    to fit, random otherwise
       if (opts.strategyRules) {
         for (const rule of opts.strategyRules) {
-          if (rule.bonus <= 0 || (!rule.modIds && !rule.nameMatch)) continue
+          if (rule.bonus <= 0 || (!rule.modIds && !rule.areaTypes)) continue
           for (const cell of resolveRuleCells(rule, borders)) {
             if (board[cell]) continue
             const used = taken()

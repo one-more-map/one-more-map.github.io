@@ -17,6 +17,14 @@ function parseKoreanImplicit(implicit: string): ChartData {
   return result.charts[0]
 }
 
+function parseKoreanArea(area: string): ChartData {
+  const result = parseChartText(koreanChart.replace('해저 마루', area))
+
+  expect(result.rejected).toEqual([])
+  expect(result.charts).toHaveLength(1)
+  return result.charts[0]
+}
+
 function renderStrategy(activeId: string, pool: ChartData[]): string {
   return renderToStaticMarkup(
     <StrategiesPanel
@@ -54,5 +62,33 @@ describe('Korean clipboard aliases feed strategy readiness', () => {
     expect(html).toContain('class="strat-notready"')
     expect(html).toContain('3× Wildwood Wisp chart')
     expect(html).toContain('2× Golden Lantern chart')
+  })
+
+  it('counts Korean Sea Pillars by destination instead of the rare Chart name', () => {
+    const first = parseKoreanArea('바다 기둥')
+    const second = { ...first, uid: `${first.uid}-second` }
+
+    expect(first.name).not.toMatch(/pillar/i)
+    expect(first.areaType).toBe('sea-pillars')
+    expect(renderStrategy('milky-meatfish', [first])).toContain(
+      '1× Sea-Pillar chart (corners)',
+    )
+    expect(renderStrategy('milky-meatfish', [first, second])).not.toContain(
+      '1× Sea-Pillar chart (corners)',
+    )
+  })
+
+  it('counts a Korean Pelagic Abyss for the Divine Strongboxes strategy', () => {
+    const ordinary = parseKoreanArea('해저 마루')
+    const pelagic = parseKoreanArea('원양 심연')
+
+    expect(pelagic.name).not.toMatch(/pelagic/i)
+    expect(pelagic.areaType).toBe('pelagic-abyss')
+    expect(renderStrategy('cutedog-divine-boxes', [ordinary])).toContain(
+      '1× Pelagic Abyss chart (high pack size)',
+    )
+    expect(renderStrategy('cutedog-divine-boxes', [pelagic])).not.toContain(
+      '1× Pelagic Abyss chart (high pack size)',
+    )
   })
 })

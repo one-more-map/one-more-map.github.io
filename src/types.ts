@@ -144,12 +144,32 @@ export interface BorderModDef {
 /** Edge connectors, clockwise from North: [N, E, S, W]. */
 export type Edges = [boolean, boolean, boolean, boolean]
 
+/** Canonical destination/area type printed between a Chart name and Area Level. */
+export type ChartAreaType =
+  | 'anchorfield'
+  | 'brine-kings-domain'
+  | 'clam-infested-shelf'
+  | 'diving-shoals'
+  | 'eldritch-depths'
+  | 'hazardous-depths'
+  | 'infested-bathyspheres'
+  | 'lost-ruins'
+  | 'abyssal-plain'
+  | 'pelagic-abyss'
+  | 'seafloor-ridges'
+  | 'sea-pillars'
+  | 'sunken-totems'
+  | 'undersea-groves'
+  | 'kisharas-rest'
+
 /** A chart instance owned by the player. */
 export interface ChartData {
   uid: string
   name: string
   level: number
   edges: Edges
+  /** locale-independent destination/area type used by curated strategies */
+  areaType?: ChartAreaType
   /** ids into VOYAGE_MODS; the revealed implicit (adjacent/voyage) mod */
   modIds: string[]
   /** the revealed implicit line verbatim, shown even if it matched no known mod */

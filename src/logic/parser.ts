@@ -5,6 +5,7 @@
 // need to know which client language produced the clipboard text.
 
 import { VOYAGE_MODS } from '../data/mods'
+import { chartAreaTypeForText } from '../data/chartAreas'
 import type { ChartData, Edges, ModEffect, Stat } from '../types'
 
 let uidCounter = 0
@@ -323,6 +324,10 @@ export function parseChartText(text: string): ParseResult {
         break
       }
     }
+    const areaTypeText = [...areaTypeLineIndexes]
+      .map((index) => lines[index])
+      .join(' ')
+    const areaType = chartAreaTypeForText(areaTypeText)
 
     // Keep explicit downside lines as raw text. Header fields, localized area
     // names and self-reward riders are structural and should not be duplicated.
@@ -347,6 +352,7 @@ export function parseChartText(text: string): ParseResult {
       name,
       level,
       edges: shape.edges,
+      areaType,
       modIds,
       implicitText,
       rewards: rewards.length ? rewards : undefined,

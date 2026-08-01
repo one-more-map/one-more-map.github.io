@@ -33,7 +33,7 @@ export const defaultState = (): AppState => ({
 
 const LS_KEY = 'allflame-voyage-solver'
 /** bump only when chart/board data (mod ids) changes incompatibly */
-const STATE_VERSION = 3 // v3: full datamined mod pools
+const STATE_VERSION = 4 // v4: parsed canonical Chart destination/area types
 
 export function saveLocal(state: AppState) {
   try {

@@ -15,7 +15,7 @@ function pieceStatus(s: StrategyDef, pool: ChartData[]) {
     const have = pool.filter(
       (c) =>
         (req.modIds && c.modIds.some((id) => req.modIds!.includes(id))) ||
-        (req.nameMatch && c.name.toLowerCase().includes(req.nameMatch.toLowerCase())),
+        (req.areaTypes && c.areaType && req.areaTypes.includes(c.areaType)),
     ).length
     return { ...req, have, missing: Math.max(0, req.count - have) }
   })

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { CHART_AREAS } from '../data/chartAreas'
 import type { ChartData, Edges } from '../types'
 import englishChart from './__fixtures__/charted.en.txt?raw'
 import koreanChart from './__fixtures__/charted.ko.txt?raw'
@@ -53,6 +54,7 @@ describe('parseChartText', () => {
     expect(chart).toMatchObject({
       name: 'Armoured Coral Reef Chart of Ice',
       level: 63,
+      areaType: 'undersea-groves',
       shape: 'Corner',
       edges: [true, true, false, false],
       implicitText: "20% increased Dead Man's Sulphur found in this Area",
@@ -71,6 +73,7 @@ describe('parseChartText', () => {
     expect(chart).toMatchObject({
       name: '해병 고역 산호 암초 해도',
       level: 81,
+      areaType: 'seafloor-ridges',
       shape: 'Junction',
       edges: [true, true, true, false],
       implicitText: '인접 지역 내 몬스터가 떨어뜨리는 장비의 40%가 골드로 전환',
@@ -95,6 +98,7 @@ describe('parseChartText', () => {
     expect(result.charts[0]).toMatchObject({
       name: '뱃사람의 항해 산호 숲 해도',
       level: 83,
+      areaType: 'sea-pillars',
       shape: 'Straight',
       modIds: ['adj-magic-1'],
     })
@@ -112,6 +116,7 @@ describe('parseChartText', () => {
     expect(result.charts[1]).toMatchObject({
       name: '염수 기행 산호 숲 해도',
       level: 83,
+      areaType: 'pelagic-abyss',
       shape: 'Crossing',
       modIds: ['adj-divbox-2'],
     })
@@ -129,6 +134,7 @@ describe('parseChartText', () => {
     expect(result.charts[2]).toMatchObject({
       name: '해양의 항해 산호 암초 해도',
       level: 83,
+      areaType: 'seafloor-ridges',
       shape: 'Junction',
       modIds: ['adj-crab-1'],
       rewards: [
@@ -157,6 +163,37 @@ describe('parseChartText', () => {
     ['Junction', 'Junction', '접점', [true, true, true, false]],
     ['Crossing', 'Crossing', '교차', [true, true, true, true]],
   ]
+
+  const areaCases = CHART_AREAS.map(
+    ({ id, english, korean }) => [id, english, korean] as const,
+  )
+
+  it('keeps the complete verified English/Korean destination table', () => {
+    expect(CHART_AREAS).toHaveLength(15)
+    expect(new Set(CHART_AREAS.map(({ id }) => id)).size).toBe(15)
+    expect(new Set(CHART_AREAS.map(({ english }) => english)).size).toBe(15)
+    expect(new Set(CHART_AREAS.map(({ korean }) => korean)).size).toBe(15)
+  })
+
+  it.each(areaCases)(
+    'maps English and Korean %s destinations to the same canonical area type',
+    (id, english, korean) => {
+      const englishParsed = parseOnlyChart(
+        englishChart.replace('Undersea Groves', english),
+      )
+      const koreanParsed = parseOnlyChart(koreanChart.replace('해저 마루', korean))
+
+      expect(englishParsed.areaType).toBe(id)
+      expect(koreanParsed.areaType).toBe(id)
+    },
+  )
+
+  it('keeps a chart with an unknown future destination without guessing its type', () => {
+    const chart = parseOnlyChart(koreanChart.replace('해저 마루', '아직 등록되지 않은 지역'))
+
+    expect(chart.areaType).toBeUndefined()
+    expect(chart.rawText).not.toContain('아직 등록되지 않은 지역')
+  })
 
   it.each(shapeCases)(
     'maps English and Korean %s shapes to the same canonical value',

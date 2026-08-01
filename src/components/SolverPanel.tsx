@@ -52,7 +52,7 @@ export function SolverPanel({ state, activeStrategy, onPatch, results, onResults
       try {
         // strategy reservations: hold back charts another strategy is saving for
         const reserve = activeStrategy?.reserveModIds
-        const reserveNames = activeStrategy?.reserveNames
+        const reserveAreaTypes = activeStrategy?.reserveAreaTypes
         // locked charts sitting on the board are pinned to their exact cell -
         // the solver arranges everything else around them (issue #9)
         const locked = state.board.map((placement) => {
@@ -71,8 +71,11 @@ export function SolverPanel({ state, activeStrategy, onPatch, results, onResults
             lockedUids.has(c.uid) ||
             ((raresAllowed || !isRareImplicit(c)) &&
               !(reserve?.length && c.modIds.some((id) => reserve.includes(id))) &&
-              !(reserveNames?.length &&
-                reserveNames.some((n) => c.name.toLowerCase().includes(n.toLowerCase())))),
+              !(
+                reserveAreaTypes?.length &&
+                c.areaType &&
+                reserveAreaTypes.includes(c.areaType)
+              )),
         )
         const raresHeld = raresAllowed
           ? 0
