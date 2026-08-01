@@ -539,6 +539,7 @@ param(
     [int]$WindowHeight = 0,
     [string]$ImagePath = '',
     [string]$Session = '',
+    [string]$PreferredLanguage = '',
     [Parameter(Mandatory = $true)][string]$OutputPath)
 
 $ErrorActionPreference = 'Stop'
@@ -673,10 +674,42 @@ function Await-Result {
 }
 
 function New-OcrEngine {
-    # Prefer an installed English recognizer because Path of Exile tooltips
-    # are English. Do not require en-US specifically: many Windows installs
-    # only have en-GB, Polish, or another Latin-script OCR language.
+    param([string]$PreferredLanguage = '')
+
     $available = @([Windows.Media.Ocr.OcrEngine]::AvailableRecognizerLanguages)
+
+    # Localized PoE clients need a matching OCR engine. Windows can expose the
+    # Korean pack as either "ko" or a regional tag such as "ko-KR", so match
+    # both the exact tag and its primary language before considering fallback.
+    if (-not [string]::IsNullOrWhiteSpace($PreferredLanguage)) {
+        $preferredTag = $PreferredLanguage.Trim()
+        $preferredPrimary = ($preferredTag -split '-', 2)[0]
+        $preferred = @($available | Where-Object {
+            $tag = $_.LanguageTag
+            $primary = ($tag -split '-', 2)[0]
+            $tag -ieq $preferredTag -or $primary -ieq $preferredPrimary
+        } | Sort-Object {
+            if ($_.LanguageTag -ieq $preferredTag) { 0 }
+            elseif ($_.LanguageTag -ieq $preferredPrimary) { 1 }
+            else { 2 }
+        })
+
+        foreach ($language in $preferred) {
+            $engine = [Windows.Media.Ocr.OcrEngine]::TryCreateFromLanguage($language)
+            if ($null -ne $engine) {
+                return $engine
+            }
+        }
+
+        throw ("Windows OCR language '$preferredTag' is not installed. " +
+            'Install the matching Windows language OCR feature. For Korean, open an elevated ' +
+            'Command Prompt and run: DISM /Online /Add-Capability ' +
+            '/CapabilityName:Language.OCR~~~ko-KR~0.0.1.0')
+    }
+
+    # English clients keep the original English-first behavior. Do not require
+    # en-US specifically: many Windows installs only have en-GB or another
+    # Latin-script OCR language.
     $english = @($available | Where-Object {
         $_.LanguageTag -eq 'en-US' -or $_.LanguageTag -like 'en-*'
     } | Sort-Object {
@@ -805,7 +838,7 @@ function Get-BorderBlock {
 }
 
 if ($ImagePath) {
-    $engine = New-OcrEngine
+    $engine = New-OcrEngine -PreferredLanguage $PreferredLanguage
     $builder = [System.Text.StringBuilder]::new()
     Add-Block $builder 0 (Read-OcrLines $ImagePath $engine)
     [System.IO.File]::WriteAllText($OutputPath, $builder.ToString(), $utf8)
@@ -818,7 +851,7 @@ if (-not $Session) {
 
 # Server mode: the expensive parts (C# compile above, OCR engine here) happen
 # ONCE, then each border is a quick file-signalled capture + recognition.
-$engine = New-OcrEngine
+$engine = New-OcrEngine -PreferredLanguage $PreferredLanguage
 Write-Atomic $OutputPath 'READY'
 $cmdFile = "$Session.cmd"
 while ($true) {
@@ -879,6 +912,16 @@ RunOcrHelper(arguments, cancellable := true) {
     return FileRead(OcrOutput, "UTF-8")
 }
 
+PreferredOcrLanguage() {
+    global PoeWinTitle
+    try {
+        processName := WinGetProcessName(PoeWinTitle)
+        if RegExMatch(processName, "i)_KG\.exe$")
+            return "ko-KR"
+    }
+    return ""
+}
+
 StartOcrServer() {
     global OcrHelper, OcrSession, OcrPid
     if (OcrPid && ProcessExist(OcrPid))
@@ -887,8 +930,13 @@ StartOcrServer() {
     try FileDelete OcrSession ".cmd"
     EnsureOcrHelper()
     quote := Chr(34)
+    preferredLanguage := PreferredOcrLanguage()
+    languageArg := preferredLanguage != ""
+        ? " -PreferredLanguage " quote preferredLanguage quote
+        : ""
     command := "powershell.exe -NoProfile -ExecutionPolicy Bypass -File "
         . quote OcrHelper quote " -Session " quote OcrSession quote
+        . languageArg
         . " -OutputPath " quote OcrSession ".ready" quote
     Run command, , "Hide", &OcrPid
 }
@@ -1019,7 +1067,10 @@ ScanBorders() {
 ; Developer smoke-test: run the embedded Windows OCR helper against an image.
 if A_Args.Length >= 2 && A_Args[1] = "--ocr-file" {
     quote := Chr(34)
-    result := RunOcrHelper("-ImagePath " quote A_Args[2] quote, false)
+    languageArg := A_Args.Length >= 3
+        ? " -PreferredLanguage " quote A_Args[3] quote
+        : ""
+    result := RunOcrHelper("-ImagePath " quote A_Args[2] quote languageArg, false)
     FileAppend result, "*", "UTF-8"
     ExitApp
 }
