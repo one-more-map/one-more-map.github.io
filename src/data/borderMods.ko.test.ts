@@ -6,11 +6,11 @@ describe('Korean border-mod evidence', () => {
   it('keeps direct client evidence separate from confirmed numeric variants', () => {
     const entries = Object.entries(KOREAN_BORDER_MOD_EVIDENCE)
 
-    expect(entries).toHaveLength(48)
-    expect(entries.filter(([, entry]) => entry.source === 'client-screenshot')).toHaveLength(28)
+    expect(entries).toHaveLength(50)
+    expect(entries.filter(([, entry]) => entry.source === 'client-screenshot')).toHaveLength(29)
     expect(
       entries.filter(([, entry]) => entry.source === 'confirmed-numeric-variant'),
-    ).toHaveLength(20)
+    ).toHaveLength(21)
   })
 
   it('only references implemented canonical border-mod ids', () => {
@@ -98,6 +98,15 @@ describe('Korean border-mod evidence', () => {
     expect(KOREAN_BORDER_MOD_EVIDENCE['b-locker']).toEqual({
       text: '인접 지역에 잃어버린 해적의 사물함 등장',
       source: 'client-screenshot',
+    })
+    expect(KOREAN_BORDER_MOD_EVIDENCE['b-rareconn-2']).toEqual({
+      text: '연결 하나당 인접 지역 내 희귀 몬스터 수 75% 증가',
+      source: 'client-screenshot',
+    })
+    expect(KOREAN_BORDER_MOD_EVIDENCE['b-rareconn-1']).toEqual({
+      text: '연결 하나당 인접 지역 내 희귀 몬스터 수 50% 증가',
+      source: 'confirmed-numeric-variant',
+      derivedFrom: 'b-rareconn-2',
     })
   })
 })

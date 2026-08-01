@@ -142,6 +142,15 @@ export const KOREAN_BORDER_MOD_EVIDENCE = {
     text: '인접 지역들 내 희귀 몬스터가 축복의 오브 1개를 추가로 떨어뜨림',
     source: 'client-screenshot',
   },
+  'b-rareconn-1': {
+    text: '연결 하나당 인접 지역 내 희귀 몬스터 수 50% 증가',
+    source: 'confirmed-numeric-variant',
+    derivedFrom: 'b-rareconn-2',
+  },
+  'b-rareconn-2': {
+    text: '연결 하나당 인접 지역 내 희귀 몬스터 수 75% 증가',
+    source: 'client-screenshot',
+  },
   'b-quantconn-1': {
     text: '연결 하나당 인접 지역들에서 발견하는 아이템 수량 50% 감소\n인접 지역들에서 발견하는 아이템 수량 120% 증가',
     source: 'client-screenshot',

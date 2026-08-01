@@ -46,6 +46,10 @@ describe('Korean border OCR matching', () => {
       '희귀',
       '회귀',
     )
+    const raresPerConnection = KOREAN_BORDER_MOD_EVIDENCE['b-rareconn-2'].text.replace(
+      '희귀',
+      '회귀',
+    )
 
     expect(parseBorderOcrPayload(block(rarity)).matches[0]?.id).toBe('b-rarity-2')
     expect(parseBorderOcrPayload(block(rareMonsters)).matches[0]?.id).toBe('b-rare-2')
@@ -53,6 +57,9 @@ describe('Korean border OCR matching', () => {
       'b-anchor-1',
     )
     expect(parseBorderOcrPayload(block(blessedOrbs)).matches[0]?.id).toBe('b-blessed')
+    expect(parseBorderOcrPayload(block(raresPerConnection)).matches[0]?.id).toBe(
+      'b-rareconn-2',
+    )
   })
 
   it('ignores leading OCR noise and tolerates the observed Captainsbane typo', () => {

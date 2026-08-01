@@ -81,8 +81,8 @@ const adjacentImplicits: VoyageModDef[] = [
   { id: 'adj-divbox-2', short: "+3 Diviner's Boxes", text: "Adjacent Areas contain 3 additional Diviner's Strongboxes", aliases: ['인접 지역들에 예언자의 금고 3개 추가 등장'], scope: 'adjacent', effects: [{ stat: 'divcards', percent: 65 }] },
   { id: 'adj-arcbox-1', short: '+2 Arcanist Boxes', text: "Adjacent Areas contain 2 additional Arcanist's Strongboxes", aliases: ['인접 지역들에 신비학자의 금고 2개 추가 등장'], scope: 'adjacent', effects: [{ stat: 'currency', percent: 40 }] },
   { id: 'adj-arcbox-2', short: '+3 Arcanist Boxes', text: "Adjacent Areas contain 3 additional Arcanist's Strongboxes", aliases: ['인접 지역들에 신비학자의 금고 3개 추가 등장'], scope: 'adjacent', effects: [{ stat: 'currency', percent: 55 }] },
-  { id: 'adj-opbox-1', short: '+2 Operative Boxes', text: "Adjacent Areas contain 2 additional Operative's Strongboxes", scope: 'adjacent', effects: [{ stat: 'scarabs', percent: 40 }] },
-  { id: 'adj-opbox-2', short: '+3 Operative Boxes', text: "Adjacent Areas contain 3 additional Operative's Strongboxes", scope: 'adjacent', effects: [{ stat: 'scarabs', percent: 55 }] },
+  { id: 'adj-opbox-1', short: '+2 Operative Boxes', text: "Adjacent Areas contain 2 additional Operative's Strongboxes", aliases: ['인접 지역들에 첩보원의 금고 2개 추가 등장'], scope: 'adjacent', effects: [{ stat: 'scarabs', percent: 40 }] },
+  { id: 'adj-opbox-2', short: '+3 Operative Boxes', text: "Adjacent Areas contain 3 additional Operative's Strongboxes", aliases: ['인접 지역들에 첩보원의 금고 3개 추가 등장'], scope: 'adjacent', effects: [{ stat: 'scarabs', percent: 55 }] },
   {
     id: 'adj-barrel-1',
     short: '+12-15 Barrels',
