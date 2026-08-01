@@ -55,6 +55,17 @@ describe('Korean border OCR matching', () => {
     expect(parseBorderOcrPayload(block(blessedOrbs)).matches[0]?.id).toBe('b-blessed')
   })
 
+  it('ignores leading OCR noise and tolerates the observed Captainsbane typo', () => {
+    const result = parseBorderOcrPayload(
+      block('叭뇩넣\n인접 지역에 지휘관의 파열 등장', 3),
+    )
+
+    expect(result.misses).toEqual([])
+    expect(result.matches).toEqual([
+      expect.objectContaining({ index: 3, id: 'b-crabboss' }),
+    ])
+  })
+
   it('normalizes Korean punctuation and spacing around numeric counters', () => {
     const noisy = '인접 지역들에서 발견하는 아이템 희귀도: 75 % 증폭'
     const result = parseBorderOcrPayload(block(noisy))
