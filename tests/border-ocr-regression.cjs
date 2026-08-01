@@ -195,7 +195,7 @@ assert.equal(noisyRarePerConnection.matches[0]?.id, 'b-rareconn-1')
 const ahkImporter = fs.readFileSync(
   require.resolve('../public/voyage-import.ahk'),
   'utf8',
-)
+).replace(/\r\n?/g, '\n')
 assert.match(ahkImporter, /TryCreateFromUserProfileLanguages/)
 assert.match(ahkImporter, /AvailableRecognizerLanguages/)
 assert.match(ahkImporter, /Invoke-OcrFile \$Path \$engine/)
@@ -209,6 +209,15 @@ assert.doesNotMatch(
   ahkImporter,
   /throw 'Windows OCR is unavailable for English \(United States\)\.'/,
 )
+
+// The official importer must collect Korean-client Charts without regressing
+// English clients or collapsing separate physical Charts with identical text.
+assert.match(
+  ahkImporter,
+  /IsChartText\(text\)\s*\{[\s\S]*?Item Class: Chart[\s\S]*?아이템 종류: 해도[\s\S]*?\}/,
+)
+assert.match(ahkImporter, /if !IsChartText\(clip\)/)
+assert.doesNotMatch(ahkImporter, /seen\.Has\(clip\)/)
 
 // The helper script is written to disk by AutoHotkey from a continuation
 // string - backtick is AHK's escape character, so any backtick in the

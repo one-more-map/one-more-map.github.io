@@ -17,6 +17,7 @@ CoordMode "ToolTip", "Screen"
 ;    Phase 3 - switches to the browser ONCE and pastes the whole buffer;
 ;              the solver parses and imports every chart from that one paste.
 ;    Empty cells copy nothing and are skipped.
+;    English and Korean client Chart headers are both supported.
 ;
 ;  ---------------------------------------------------------------
 ;  ONE-TIME SETUP
@@ -466,6 +467,11 @@ CellPos(row, col) {
 }
 
 Calibrated() => (TLx != 0 && TLy != 0 && BRx != 0 && BRy != 0)
+
+IsChartText(text) {
+    return InStr(text, "Item Class: Chart")
+        || InStr(text, "아이템 종류: 해도")
+}
 
 ExactBordersCalibrated() {
     global ExactBorderPoints
@@ -1226,7 +1232,7 @@ RunSweep(*) {
     }
 
     Running := true
-    copied := 0, skipped := 0, blob := "", borderBlob := "", seen := Map()
+    copied := 0, skipped := 0, blob := "", borderBlob := ""
 
     ; ---- Phase 1: copy every chart while staying in PoE ----
     WinActivate PoeWinTitle
@@ -1255,11 +1261,12 @@ RunSweep(*) {
                 continue
             }
             clip := Trim(A_Clipboard, " `t`r`n")
-            if !InStr(clip, "Item Class") || seen.Has(clip) {
-                skipped++                 ; not an item, or a duplicate
+            if !IsChartText(clip) {
+                skipped++                 ; not a Chart item
                 continue
             }
-            seen[clip] := true
+            ; Keep identical item text: separate physical Charts are separate
+            ; solver pieces even when every copied property is the same.
             blob .= (blob = "" ? "" : "`n") clip
             copied++
             ToolTip "Copying... row " (r+1) " col " (c+1)
@@ -1301,5 +1308,5 @@ RunSweep(*) {
         ? (borderBlob != "" ? " + 12 border OCR scans" : " (border OCR failed)")
         : " (borders skipped: run the tray Setup wizard)"
     Flash "Done. Sent " copied " charts" borderNote
-        . "; skipped " skipped " empty/dup cells.", 6000
+        . "; skipped " skipped " empty/non-chart cells.", 6000
 }
