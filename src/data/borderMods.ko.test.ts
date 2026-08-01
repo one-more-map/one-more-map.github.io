@@ -6,8 +6,8 @@ describe('Korean border-mod evidence', () => {
   it('keeps direct client evidence separate from confirmed numeric variants', () => {
     const entries = Object.entries(KOREAN_BORDER_MOD_EVIDENCE)
 
-    expect(entries).toHaveLength(47)
-    expect(entries.filter(([, entry]) => entry.source === 'client-screenshot')).toHaveLength(27)
+    expect(entries).toHaveLength(48)
+    expect(entries.filter(([, entry]) => entry.source === 'client-screenshot')).toHaveLength(28)
     expect(
       entries.filter(([, entry]) => entry.source === 'confirmed-numeric-variant'),
     ).toHaveLength(20)
@@ -93,6 +93,10 @@ describe('Korean border-mod evidence', () => {
     })
     expect(KOREAN_BORDER_MOD_EVIDENCE['b-decks']).toEqual({
       text: '인접 지역들에서 몬스터가 떨어뜨리는 기본 화폐 아이템이 카드 묶음으로 떨어짐',
+      source: 'client-screenshot',
+    })
+    expect(KOREAN_BORDER_MOD_EVIDENCE['b-locker']).toEqual({
+      text: '인접 지역에 잃어버린 해적의 사물함 등장',
       source: 'client-screenshot',
     })
   })

@@ -126,6 +126,10 @@ export const KOREAN_BORDER_MOD_EVIDENCE = {
     text: '등불을 배치해도 인접 지역들의 등불 개수가 감소하지 않음',
     source: 'client-screenshot',
   },
+  'b-locker': {
+    text: '인접 지역에 잃어버린 해적의 사물함 등장',
+    source: 'client-screenshot',
+  },
   'b-ancient': {
     text: '인접 지역 내 희귀 몬스터가 고대의 오브 1개를 추가로 떨어뜨림',
     source: 'client-screenshot',
