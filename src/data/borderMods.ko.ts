@@ -134,6 +134,10 @@ export const KOREAN_BORDER_MOD_EVIDENCE = {
     text: '인접 지역들 내 희귀 몬스터가 바알 오브 1개를 추가로 떨어뜨림',
     source: 'client-screenshot',
   },
+  'b-blessed': {
+    text: '인접 지역들 내 희귀 몬스터가 축복의 오브 1개를 추가로 떨어뜨림',
+    source: 'client-screenshot',
+  },
   'b-quantconn-1': {
     text: '연결 하나당 인접 지역들에서 발견하는 아이템 수량 50% 감소\n인접 지역들에서 발견하는 아이템 수량 120% 증가',
     source: 'client-screenshot',
@@ -150,6 +154,10 @@ export const KOREAN_BORDER_MOD_EVIDENCE = {
     text: '인접 지역 내 몬스터가 떨어뜨리는 장비의 50%가 골드로 전환',
     source: 'confirmed-numeric-variant',
     derivedFrom: 'b-gold-1',
+  },
+  'b-decks': {
+    text: '인접 지역들에서 몬스터가 떨어뜨리는 기본 화폐 아이템이 카드 묶음으로 떨어짐',
+    source: 'client-screenshot',
   },
   'b-scarabdrop': {
     text: '인접 지역 내 희귀 몬스터가 갑충석 1개를 추가로 떨어뜨림',

@@ -280,9 +280,9 @@ describe('parseChartText', () => {
   })
 
   it('maps all observed Korean implicit lines to canonical ids without changing raw text', () => {
-    expect(koreanImplicitAliasCases).toHaveLength(38)
-    expect(koreanImplicitAliasCases.reduce((sum, entry) => sum + entry.occurrences, 0)).toBe(63)
-    expect(new Set(koreanImplicitAliasCases.map(({ modId }) => modId)).size).toBe(34)
+    expect(koreanImplicitAliasCases).toHaveLength(39)
+    expect(koreanImplicitAliasCases.reduce((sum, entry) => sum + entry.occurrences, 0)).toBe(64)
+    expect(new Set(koreanImplicitAliasCases.map(({ modId }) => modId)).size).toBe(35)
 
     for (const { rawText, modId } of koreanImplicitAliasCases) {
       const chart = parseOnlyChart(koreanChart.replace(KOREAN_CHARTED_IMPLICIT, rawText))

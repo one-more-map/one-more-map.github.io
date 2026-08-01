@@ -42,12 +42,17 @@ describe('Korean border OCR matching', () => {
       '닻',
       '닺',
     )
+    const blessedOrbs = KOREAN_BORDER_MOD_EVIDENCE['b-blessed'].text.replace(
+      '희귀',
+      '회귀',
+    )
 
     expect(parseBorderOcrPayload(block(rarity)).matches[0]?.id).toBe('b-rarity-2')
     expect(parseBorderOcrPayload(block(rareMonsters)).matches[0]?.id).toBe('b-rare-2')
     expect(parseBorderOcrPayload(block(treasureAnchors)).matches[0]?.id).toBe(
       'b-anchor-1',
     )
+    expect(parseBorderOcrPayload(block(blessedOrbs)).matches[0]?.id).toBe('b-blessed')
   })
 
   it('normalizes Korean punctuation and spacing around numeric counters', () => {

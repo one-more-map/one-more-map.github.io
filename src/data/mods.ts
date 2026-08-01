@@ -137,7 +137,7 @@ const voyageImplicits: VoyageModDef[] = [
   { id: 'voy-magic', text: '25% increased Magic Monsters', aliases: ['모든 항해 지역 내 마법 몬스터 수 25% 증가'], scope: 'global', effects: [{ stat: 'magicmonsters', percent: 25 }] },
   { id: 'voy-noequip', short: 'No Equipment Drops', text: 'Monsters in all Voyage Areas cannot drop Equipment, Flasks or Tinctures', scope: 'global', effects: [] },
   { id: 'voy-minmagic', short: 'All at least Magic', text: 'Monsters in Area are at least Magic', aliases: ['모든 항해 지역 내 몬스터가 마법 이상으로 등장'], scope: 'global', effects: [{ stat: 'magicmonsters', percent: 30 }] },
-  { id: 'voy-possess', short: 'Rares Possessed', text: '100% chance for Rare Monsters in Area to be Possessed', scope: 'global', effects: [{ stat: 'spirits', percent: 100 }] },
+  { id: 'voy-possess', short: 'Rares Possessed', text: '100% chance for Rare Monsters in Area to be Possessed', aliases: ['모든 항해 지역 내 희귀 몬스터가 100%의 확률로 사로잡힘'], scope: 'global', effects: [{ stat: 'spirits', percent: 100 }] },
   { id: 'voy-essence', short: 'Rares Essenced', text: 'Rare monsters that are natural inhabitants are imprisoned by Essences', aliases: ['모든 항해 지역 내 자연적으로 서식하는 희귀 몬스터가 에센스에 갇힘'], scope: 'global', effects: [{ stat: 'essences', percent: 40 }] },
   { id: 'voy-fracture', short: '50% Rare Fracture', text: '50% chance for Rare Monsters to Fracture on death', scope: 'global', effects: [{ stat: 'rares', percent: 50 }] },
   { id: 'voy-flask', short: '20% Flask Quality', text: 'Flasks found in all Voyage Areas have 100% chance to have 20% Quality', scope: 'global', effects: [] },
