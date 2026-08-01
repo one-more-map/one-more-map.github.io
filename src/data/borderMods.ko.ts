@@ -203,8 +203,7 @@ export const KOREAN_BORDER_MOD_EVIDENCE = {
   },
   'b-anchor-1': {
     text: '인접 지역들에 보물 닻 2개 추가 등장',
-    source: 'confirmed-numeric-variant',
-    derivedFrom: 'b-anchor-2',
+    source: 'client-screenshot',
   },
   'b-anchor-2': {
     text: '인접 지역들에 보물 닻 4개 추가 등장',
