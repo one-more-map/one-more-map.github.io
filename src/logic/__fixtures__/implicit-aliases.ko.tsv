@@ -1,4 +1,4 @@
-# Source: user-provided Korean Path of Exile Ctrl+C clipboard text, 2026-07-31 through 2026-08-02.
+# Source: user-provided Korean Path of Exile Ctrl+C clipboard text, 2026-07-31 through 2026-08-04.
 # Only line endings were normalized. These lines are not derived from an external catalog.
 # Format: verbatim implicit text<TAB>canonical id<TAB>observed count
 인접 지역들 내 희귀 몬스터 수 30% 증가	adj-rare-1	4
@@ -42,3 +42,4 @@
 모든 항해 지역 내 희귀 몬스터가 100%의 확률로 사로잡힘	voy-possess	1
 인접 지역들에 첩보원의 금고 2개 추가 등장	adj-opbox-1	1
 인접 지역들에서 떨어지는 반지가 20% 확률로 고유 반지로 떨어짐	adj-uring-2	1
+인접 지역들에서 떨어지는 아이템이 2% 확률로 분열된 등급	adj-fracture	1

@@ -108,6 +108,7 @@ const adjacentImplicits: VoyageModDef[] = [
     effects: [{ stat: 'packsize', percent: 15 }],
   },
   { id: 'adj-star-2', short: '+6-7 Starfish', text: 'Adjacent Areas contains 6-7 additional Giant Starfish', aliases: ['인접 지역들에 에 거대 불가사리 7(6-7)마리 추가 등장'], scope: 'adjacent', effects: [{ stat: 'packsize', percent: 20 }] },
+  { id: 'adj-fracture', short: '2% Fractured Items', text: 'Items dropped in adjacent Areas have 2% chance to be Fractured', aliases: ['인접 지역들에서 떨어지는 아이템이 2% 확률로 분열된 등급'], scope: 'adjacent', effects: [] },
   { id: 'adj-lantern', short: '+4 Gold Lanterns', text: 'Adjacent Areas contain 4 additional Golden Lanterns', aliases: ['인접 지역들에 황금 등불 4개 추가 등장'], scope: 'adjacent', effects: [{ stat: 'treasure', percent: 20 }] },
   { id: 'adj-pantheon', short: 'Pantheon Rares', text: 'Rare Monsters in adjacent Areas will have a Pantheon Modifier', aliases: ['인접 지역들 내 희귀 몬스터가 판테온 속성 1개 보유'], scope: 'adjacent', effects: [{ stat: 'rares', percent: 25 }] },
   { id: 'adj-uring-1', short: '10% Unique Ring', text: 'Rings dropped in adjacent Areas have 10% chance to instead drop as a Unique Ring', aliases: ['인접 지역들에서 떨어지는 반지가 10% 확률로 고유 반지로 떨어짐'], scope: 'adjacent', effects: [{ stat: 'uniques', percent: 20 }] },
