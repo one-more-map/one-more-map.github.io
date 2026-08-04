@@ -6,8 +6,8 @@ describe('Korean border-mod evidence', () => {
   it('keeps direct client evidence separate from confirmed numeric variants', () => {
     const entries = Object.entries(KOREAN_BORDER_MOD_EVIDENCE)
 
-    expect(entries).toHaveLength(50)
-    expect(entries.filter(([, entry]) => entry.source === 'client-screenshot')).toHaveLength(29)
+    expect(entries).toHaveLength(52)
+    expect(entries.filter(([, entry]) => entry.source === 'client-screenshot')).toHaveLength(31)
     expect(
       entries.filter(([, entry]) => entry.source === 'confirmed-numeric-variant'),
     ).toHaveLength(21)
@@ -83,6 +83,14 @@ describe('Korean border-mod evidence', () => {
     expect(KOREAN_BORDER_MOD_EVIDENCE['b-ancient'].text).toBe(
       '인접 지역 내 희귀 몬스터가 고대의 오브 1개를 추가로 떨어뜨림',
     )
+    expect(KOREAN_BORDER_MOD_EVIDENCE['b-divine']).toEqual({
+      text: '인접 지역 내 희귀 몬스터가 신성한 오브 1개를 추가로 떨어뜨림',
+      source: 'client-screenshot',
+    })
+    expect(KOREAN_BORDER_MOD_EVIDENCE['b-regret']).toEqual({
+      text: '인접 지역들 내 희귀 몬스터가 후회의 오브 1개를 추가로 떨어뜨림',
+      source: 'client-screenshot',
+    })
     expect(KOREAN_BORDER_MOD_EVIDENCE['b-anchor-1']).toEqual({
       text: '인접 지역들에 보물 닻 2개 추가 등장',
       source: 'client-screenshot',

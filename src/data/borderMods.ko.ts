@@ -134,8 +134,16 @@ export const KOREAN_BORDER_MOD_EVIDENCE = {
     text: '인접 지역 내 희귀 몬스터가 고대의 오브 1개를 추가로 떨어뜨림',
     source: 'client-screenshot',
   },
+  'b-divine': {
+    text: '인접 지역 내 희귀 몬스터가 신성한 오브 1개를 추가로 떨어뜨림',
+    source: 'client-screenshot',
+  },
   'b-vaal': {
     text: '인접 지역들 내 희귀 몬스터가 바알 오브 1개를 추가로 떨어뜨림',
+    source: 'client-screenshot',
+  },
+  'b-regret': {
+    text: '인접 지역들 내 희귀 몬스터가 후회의 오브 1개를 추가로 떨어뜨림',
     source: 'client-screenshot',
   },
   'b-blessed': {
