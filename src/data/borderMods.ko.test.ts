@@ -6,11 +6,11 @@ describe('Korean border-mod evidence', () => {
   it('keeps direct client evidence separate from confirmed numeric variants', () => {
     const entries = Object.entries(KOREAN_BORDER_MOD_EVIDENCE)
 
-    expect(entries).toHaveLength(52)
-    expect(entries.filter(([, entry]) => entry.source === 'client-screenshot')).toHaveLength(31)
+    expect(entries).toHaveLength(55)
+    expect(entries.filter(([, entry]) => entry.source === 'client-screenshot')).toHaveLength(32)
     expect(
       entries.filter(([, entry]) => entry.source === 'confirmed-numeric-variant'),
-    ).toHaveLength(21)
+    ).toHaveLength(23)
   })
 
   it('only references implemented canonical border-mod ids', () => {
@@ -80,6 +80,20 @@ describe('Korean border-mod evidence', () => {
     expect(KOREAN_BORDER_MOD_EVIDENCE['b-scarabdrop'].text).toBe(
       '인접 지역 내 희귀 몬스터가 갑충석 1개를 추가로 떨어뜨림',
     )
+    expect(KOREAN_BORDER_MOD_EVIDENCE['b-curr-1']).toEqual({
+      text: '인접 지역들에서 발견하는 화폐 50% 증폭',
+      source: 'client-screenshot',
+    })
+    expect(KOREAN_BORDER_MOD_EVIDENCE['b-curr-2']).toEqual({
+      text: '인접 지역들에서 발견하는 화폐 75% 증폭',
+      source: 'confirmed-numeric-variant',
+      derivedFrom: 'b-curr-1',
+    })
+    expect(KOREAN_BORDER_MOD_EVIDENCE['b-curr-3']).toEqual({
+      text: '인접 지역들에서 발견하는 화폐 100% 증폭',
+      source: 'confirmed-numeric-variant',
+      derivedFrom: 'b-curr-1',
+    })
     expect(KOREAN_BORDER_MOD_EVIDENCE['b-ancient'].text).toBe(
       '인접 지역 내 희귀 몬스터가 고대의 오브 1개를 추가로 떨어뜨림',
     )
