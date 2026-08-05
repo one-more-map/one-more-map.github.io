@@ -142,6 +142,10 @@ export const KOREAN_BORDER_MOD_EVIDENCE = {
     text: '인접 지역 내 희귀 몬스터가 신성한 오브 1개를 추가로 떨어뜨림',
     source: 'client-screenshot',
   },
+  'b-gcp': {
+    text: '인접 지역들 내 희귀 몬스터가 세공사의 프리즘 1개를 추가로 떨어뜨림',
+    source: 'client-screenshot',
+  },
   'b-vaal': {
     text: '인접 지역들 내 희귀 몬스터가 바알 오브 1개를 추가로 떨어뜨림',
     source: 'client-screenshot',

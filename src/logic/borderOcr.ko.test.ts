@@ -50,6 +50,10 @@ describe('Korean border OCR matching', () => {
       '희귀',
       '회귀',
     )
+    const gemcuttersPrisms = KOREAN_BORDER_MOD_EVIDENCE['b-gcp'].text.replace(
+      '희귀',
+      '회귀',
+    )
     const raresPerConnection = KOREAN_BORDER_MOD_EVIDENCE['b-rareconn-2'].text.replace(
       '희귀',
       '회귀',
@@ -62,6 +66,7 @@ describe('Korean border OCR matching', () => {
     )
     expect(parseBorderOcrPayload(block(blessedOrbs)).matches[0]?.id).toBe('b-blessed')
     expect(parseBorderOcrPayload(block(chaosOrbs)).matches[0]?.id).toBe('b-chaos')
+    expect(parseBorderOcrPayload(block(gemcuttersPrisms)).matches[0]?.id).toBe('b-gcp')
     expect(parseBorderOcrPayload(block(raresPerConnection)).matches[0]?.id).toBe(
       'b-rareconn-2',
     )
