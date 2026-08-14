@@ -14,6 +14,13 @@ export interface UpdateEntry {
 export const UPDATES: UpdateEntry[] = [
   {
     date: '2026-08-14',
+    tag: 'reworked',
+    title: 'Alc & Go Snake mode',
+    detail:
+      'The Alc & Go layout picker is now a toggle - Three-lane highway or Snake - and Snake no longer chases one fixed serpentine. It solves for the no-backtracking property itself: one line from the ⚓ start (bottom-left) to the top-right, every other tile keeping at least 2 real connections, arms off the board rim allowed as free dead ends. If your junk pieces cannot make a pure line it bends into loops (3/4-way tiles) you snake yourself rather than stranding a dead end mid-path.',
+  },
+  {
+    date: '2026-08-14',
     tag: 'new',
     title: 'HDR-aware border capture (experimental)',
     detail:

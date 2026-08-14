@@ -69,7 +69,17 @@ export interface StrategyDef {
   layoutPenalty?: number
   /** selectable layout shapes (first = default); shown as a picker on the
    *  strategy card, the choice persists per strategy */
-  layouts?: { id: string; label: string; hint: string; layout: Edges[] }[]
+  layouts?: {
+    id: string
+    label: string
+    hint: string
+    layout: Edges[]
+    /** judge the connection graph (no dead ends) instead of exact cell shapes;
+     *  `layout` and `seeds` then only seed the solver's restarts */
+    snake?: boolean
+    /** extra seed layouts for snake restarts (both serpentine directions) */
+    seeds?: Edges[][]
+  }[]
   /** Optional keeper groups excluded while this strategy is active. Users can
    *  enable each group independently in the solver controls. */
   reservationGroups?: StrategyReservationGroup[]
@@ -223,9 +233,12 @@ const ALC_GO_LAYOUT: Edges[] = [
   [T, F, F, T], // 8 corner
 ]
 
-// Alc & Go "S-snake" (community request from the Reddit thread): one
-// continuous serpentine from the ⚓ start - fastest to actually run, at the
-// cost of burning corner pieces faster than ends.
+// Alc & Go "snake" (community request from the Reddit thread): one continuous
+// serpentine from the ⚓ start - fastest to actually run, no backtracking.
+// The solver doesn't demand these exact shapes: snake mode scores the
+// CONNECTION GRAPH (no mid-path dead ends; arms off the rim are free), so
+// whatever the pieces allow still threads end to end. These two serpentines
+// (rows-first and lanes-first out of the ⚓) just seed its restarts.
 // Path: 6 → 7 → 8 → 5 → 4 → 3 → 0 → 1 → 2. 8 connections.
 const ALC_GO_SNAKE: Edges[] = [
   [F, T, T, F], // 0 corner (S to 3, E to 1)
@@ -239,6 +252,20 @@ const ALC_GO_SNAKE: Edges[] = [
   [T, F, F, T], // 8 corner (N to 5, W to 7)
 ]
 
+// the same serpentine leaving the ⚓ upward instead of along the bottom row.
+// Path: 6 → 3 → 0 → 1 → 4 → 7 → 8 → 5 → 2. 8 connections.
+const ALC_GO_SNAKE_UP: Edges[] = [
+  [F, T, T, F], // 0 corner (S to 3, E to 1)
+  [F, F, T, T], // 1 corner (W to 0, S to 4)
+  [F, F, T, F], // 2 end (tail; S to 5)
+  [T, F, T, F], // 3 straight
+  [T, F, T, F], // 4 straight
+  [T, F, T, F], // 5 straight
+  [T, F, F, F], // 6 end (start; N to 3)
+  [T, T, F, F], // 7 corner (N to 4, E to 8)
+  [T, F, F, T], // 8 corner (N to 5, W to 7)
+]
+
 export const STRATEGIES: StrategyDef[] = [
   {
     id: 'alc-and-go',
@@ -247,7 +274,7 @@ export const STRATEGIES: StrategyDef[] = [
     source: { label: 'Milky’s strat', url: '' },
     guide: [
       'Uses only charts no other strategy needs - keeper charts are held back by default, with independent protections in Solver Settings.',
-      'Forms single-lane highways (three lanes joined along the bottom) - or whatever the shapes allow.',
+      'Forms single-lane highways (three lanes joined along the bottom) - or flip the Layout toggle to Snake for one continuous no-backtrack path.',
       'Don’t care what’s on the tiles: you’re there for scattered loot, sulphur and random encounters.',
       'Alc, go, place every lantern, click everything, leave. Rinse and repeat between real runs.',
     ],
@@ -268,9 +295,11 @@ export const STRATEGIES: StrategyDef[] = [
       },
       {
         id: 'snake',
-        label: 'S-snake',
-        hint: 'one continuous path - fastest to run',
+        label: 'Snake',
+        hint: 'one continuous path, no backtracking - bends to fit whatever pieces you have (3/4-ways become loops or off-board dead ends)',
         layout: ALC_GO_SNAKE,
+        snake: true,
+        seeds: [ALC_GO_SNAKE, ALC_GO_SNAKE_UP],
       },
     ],
     layoutPenalty: 15, // a preference, not a law - "whatever works"

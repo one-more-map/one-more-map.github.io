@@ -62,6 +62,8 @@ export function SolveBar({ state, activeStrategy, results, appliedIdx, onResults
           strategyRules: activeStrategy?.rules,
           strategyLayout: layoutVariant?.layout ?? activeStrategy?.layout,
           strategyLayoutPenalty: activeStrategy?.layoutPenalty,
+          strategySnake: layoutVariant?.snake,
+          strategySeedLayouts: layoutVariant?.seeds,
           locked,
         })
         onResults(res)

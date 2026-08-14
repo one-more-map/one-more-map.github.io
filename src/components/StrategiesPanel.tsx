@@ -168,16 +168,16 @@ export function StrategiesPanel({ activeId, pool, borders, onSelect, layoutChoic
                   <div className="strat-layouts">
                     <div className="strat-layouts-row">
                       <span className="strat-layouts-label">Layout</span>
-                      <select
-                        value={chosen.id}
-                        onChange={(e) => onLayoutChoice?.(s.id, e.target.value)}
-                      >
-                        {s.layouts.map((v) => (
-                          <option key={v.id} value={v.id}>
-                            {v.label}
-                          </option>
-                        ))}
-                      </select>
+                      {s.layouts.map((v) => (
+                        <button
+                          key={v.id}
+                          className={`strat-layout-btn ${v.id === chosen.id ? 'on' : ''}`}
+                          onClick={() => onLayoutChoice?.(s.id, v.id)}
+                          title={v.hint}
+                        >
+                          {v.label}
+                        </button>
+                      ))}
                     </div>
                     <div className="strat-layouts-hint muted">{chosen.hint}</div>
                   </div>

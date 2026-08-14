@@ -1882,9 +1882,17 @@ textarea {
   font-size: 11.5px;
   white-space: nowrap;
 }
-.strat-layouts select {
+.strat-layout-btn {
   flex: 1;
   min-width: 0;
+  padding: 4px 8px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.strat-layout-btn.on {
+  border-color: var(--accent2);
+  color: var(--accent2);
+  box-shadow: 0 0 6px rgba(107, 163, 200, 0.3);
 }
 .strat-layouts-hint {
   margin-top: 2px;

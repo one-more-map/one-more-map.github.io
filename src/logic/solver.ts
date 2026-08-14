@@ -1,5 +1,5 @@
 import type { Board, Borders, ChartData, ConnectivityMode, Edges, Placement, Weights } from '../types'
-import { borderTouches } from '../types'
+import { START_CELL, borderTouches } from '../types'
 import type { PositionRule } from '../data/strategies'
 import { checkConnectivity, rotateEdges } from './connectivity'
 import { scoreBoard, type ScoreOptions } from './scoring'
@@ -19,6 +19,14 @@ export interface SolverOptions extends ScoreOptions {
   locked?: (Placement | null)[]
   /** per-cell cost of deviating from strategyLayout (default strict) */
   strategyLayoutPenalty?: number
+  /** snake mode: instead of matching strategyLayout cell-for-cell, require the
+   *  connection graph itself to thread the board - every tile keeps ≥2 matched
+   *  on-board connections (the ⚓ start and the far corner may have 1), so the
+   *  voyage runs end to end without backtracking. Arms off the outer rim are
+   *  free dead ends. strategyLayout then only seeds the climb. */
+  strategySnake?: boolean
+  /** extra seed layouts for snake restarts (e.g. both serpentine directions) */
+  strategySeedLayouts?: Edges[][]
 }
 
 /** heavy per-cell penalty: an exact-layout strategy treats deviation as broken */
@@ -33,6 +41,57 @@ function rotationFor(edges: Edges, target: Edges, rotMax: number): number | null
   return null
 }
 
+/** does this arm of this cell point off the outer rim? (N,E,S,W = 0..3) */
+const offBoardArm = (cell: number, dir: number): boolean =>
+  (dir === 0 && cell < 3) ||
+  (dir === 1 && cell % 3 === 2) ||
+  (dir === 2 && cell > 5) ||
+  (dir === 3 && cell % 3 === 0)
+
+/** snake-tolerant shape match: exact fit first, otherwise a superset whose
+ *  extra arms ALL dangle off the rim (a 3/4-way on the edge stays a snake -
+ *  the spare ways are just dead ends off-screen) */
+function snakeRotationFor(edges: Edges, target: Edges, cell: number, rotMax: number): number | null {
+  let fallback: number | null = null
+  for (let r = 0; r < rotMax; r++) {
+    const e = rotateEdges(edges, r)
+    if (edgesEqual(e, target)) return r
+    if (fallback === null) {
+      let ok = true
+      for (let d = 0; d < 4; d++) {
+        if (target[d] && !e[d]) ok = false
+        else if (e[d] && !target[d] && !offBoardArm(cell, d)) ok = false
+        if (!ok) break
+      }
+      if (ok) fallback = r
+    }
+  }
+  return fallback
+}
+
+
+/** snake rules: the ⚓ start (bottom-left) and the far corner (top-right) are
+ *  the path's two tips - the only tiles allowed a single connection */
+const SNAKE_END_CELL = 2
+/** a tile below its minimum degree is a mid-path dead end - the exact
+ *  backtracking snake mode exists to kill, so it outweighs any reward */
+const SNAKE_DEADEND_PENALTY = 90
+/** 3/4-way tiles are legal (the player snakes the loop themselves) but a pure
+ *  single line is preferred when the pieces allow one */
+const SNAKE_BRANCH_PENALTY = 4
+
+/** penalty for connection-graph shapes a snake run can't thread cleanly */
+function snakePenalty(degrees: number[], board: Board): number {
+  let pen = 0
+  for (let i = 0; i < 9; i++) {
+    if (!board[i]) continue // empty cells are already punished via unfilled
+    const need = i === START_CELL || i === SNAKE_END_CELL ? 1 : 2
+    const deg = degrees[i]
+    if (deg < need) pen += (need - deg) * SNAKE_DEADEND_PENALTY
+    else if (deg > 2) pen += (deg - 2) * SNAKE_BRANCH_PENALTY
+  }
+  return pen
+}
 
 /** how many cells deviate from the strategy's exact layout */
 function layoutMisses(board: Board, charts: Map<string, ChartData>, layout: Edges[]): number {
@@ -133,9 +192,13 @@ function evaluate(
   // while keeping the runnable requirements (connections good, violations bad)
   const rewardTerm = opts.minimizeReward ? -s.total : s.total
   const strat = opts.strategyRules ? strategyBonus(board, charts, opts.strategyRules, borders) : 0
-  const layoutPen = opts.strategyLayout
-    ? layoutMisses(board, charts, opts.strategyLayout) * (opts.strategyLayoutPenalty ?? LAYOUT_PENALTY)
-    : 0
+  // snake mode judges the connection graph, not resemblance to a fixed layout:
+  // ANY arrangement that threads the board without dead ends scores clean
+  const layoutPen = opts.strategySnake
+    ? snakePenalty(conn.degrees, board)
+    : opts.strategyLayout
+      ? layoutMisses(board, charts, opts.strategyLayout) * (opts.strategyLayoutPenalty ?? LAYOUT_PENALTY)
+      : 0
   const objective =
     rewardTerm +
     strat +
@@ -234,21 +297,33 @@ function hillClimb(
 ) {
   // strategies need more exploration: seeded restarts vary piece rotations,
   // and the climb has to reshape the board around the lucky combinations
-  const hasStrategy = !!(opts.strategyRules || opts.strategyLayout)
+  const hasStrategy = !!(opts.strategyRules || opts.strategyLayout || opts.strategySnake)
   const RESTARTS = hasStrategy ? 60 : 40
   const ITERS = hasStrategy ? 5000 : 4000
   const rotMax = opts.allowRotation ? 4 : 1
 
   const evalScore = (b: Board) => evaluate(b, borders, charts, weights, opts).score
 
+  // snake seeding tolerates junction pieces whose spare arms fall off the rim
+  const fitRotation = (edges: Edges, target: Edges, cell: number): number | null =>
+    opts.strategySnake
+      ? snakeRotationFor(edges, target, cell, rotMax)
+      : rotationFor(edges, target, rotMax)
+
   for (let r = 0; r < RESTARTS; r++) {
     // random initial: shuffle pool, take up to 9. Locked cells are fixed.
     const shuffled = [...pool].sort(() => Math.random() - 0.5)
     const board: Board = locked.map((p) => (p ? { ...p } : null))
 
+    // snake restarts rotate through the seed serpentines (e.g. lanes-first vs
+    // rows-first) so both starting directions from the ⚓ get explored
+    const seeds = opts.strategySeedLayouts
+    const seedLayout =
+      seeds && seeds.length > 0 ? seeds[Math.floor(r / 2) % seeds.length] : opts.strategyLayout
+
     // strategy-seeded restarts (every other one): pre-place matching charts on
     // their target cells so rare shapes/pieces aren't left to random luck
-    if (r % 2 === 0 && (opts.strategyRules || opts.strategyLayout)) {
+    if (r % 2 === 0 && (opts.strategyRules || seedLayout)) {
       const taken = () => new Set(board.filter(Boolean).map((p) => p!.chartUid))
       // 1) positive rule cells first: the designated piece goes there in ANY
       //    shape (location beats lines); use the layout rotation if it happens
@@ -261,9 +336,9 @@ function hillClimb(
             const used = taken()
             const cands = shuffled.filter((c) => !used.has(c.uid) && chartMatchesRule(c, rule))
             if (cands.length === 0) continue
-            const target = opts.strategyLayout?.[cell]
+            const target = seedLayout?.[cell]
             const shaped = target
-              ? cands.find((c) => rotationFor(c.edges, target, rotMax) !== null)
+              ? cands.find((c) => fitRotation(c.edges, target, cell) !== null)
               : undefined
             const pick = shaped ?? cands[0]
             // exact-shape pieces take the layout rotation; others get a RANDOM
@@ -271,29 +346,31 @@ function hillClimb(
             // (the climb then reshapes the board around the lucky ones)
             const rot =
               shaped && target
-                ? rotationFor(pick.edges, target, rotMax)!
+                ? fitRotation(pick.edges, target, cell)!
                 : Math.floor(Math.random() * rotMax)
             board[cell] = { chartUid: pick.uid, rotation: rot }
           }
         }
       }
       // 2) remaining layout cells: shape-matching charts, avoiding banned mods
-      if (opts.strategyLayout) {
+      if (seedLayout) {
         for (let cell = 0; cell < 9; cell++) {
-          const target = opts.strategyLayout[cell]
+          const target = seedLayout[cell]
           if (!target || board[cell]) continue
           const used = taken()
           const bannedRules = opts.strategyRules?.filter(
             (ru) => ru.bonus < 0 && resolveRuleCells(ru, borders).includes(cell),
           )
-          const pick = shuffled.find(
-            (c) =>
-              !used.has(c.uid) &&
-              rotationFor(c.edges, target, rotMax) !== null &&
-              !bannedRules?.some((ru) => chartMatchesRule(c, ru)),
-          )
+          const usable = (c: ChartData) =>
+            !used.has(c.uid) && !bannedRules?.some((ru) => chartMatchesRule(c, ru))
+          // exact shapes first so snake fallbacks don't waste the scarce ones
+          const pick =
+            shuffled.find((c) => usable(c) && rotationFor(c.edges, target, rotMax) !== null) ??
+            (opts.strategySnake
+              ? shuffled.find((c) => usable(c) && snakeRotationFor(c.edges, target, cell, rotMax) !== null)
+              : undefined)
           if (pick)
-            board[cell] = { chartUid: pick.uid, rotation: rotationFor(pick.edges, target, rotMax)! }
+            board[cell] = { chartUid: pick.uid, rotation: fitRotation(pick.edges, target, cell)! }
         }
       }
     }

@@ -27,6 +27,8 @@ export interface ConnectivityResult {
   disconnected: number
   /** number of matched connections (shared edges where both charts connect) */
   connections: number
+  /** per-cell count of matched on-board connections (off-board arms excluded) */
+  degrees: number[]
 }
 
 /**
@@ -84,9 +86,10 @@ export function checkConnectivity(
     }
   }
   mismatches /= 2 // each mismatched pair is seen from both tiles
+  const degrees = adj.map((links) => links.length)
 
   if (mode === 'any')
-    return { valid: true, violations: 0, mismatches: 0, unfilled, disconnected: 0, connections }
+    return { valid: true, violations: 0, mismatches: 0, unfilled, disconnected: 0, connections, degrees }
 
   // reachability: flood-fill from the start square over matched connections
   let disconnected = 0
@@ -104,5 +107,5 @@ export function checkConnectivity(
   }
 
   const violations = mismatches + unfilled + disconnected
-  return { valid: violations === 0, violations, mismatches, unfilled, disconnected, connections }
+  return { valid: violations === 0, violations, mismatches, unfilled, disconnected, connections, degrees }
 }
