@@ -1,4 +1,4 @@
-# Source: user-provided Korean Path of Exile Ctrl+C clipboard text, 2026-07-31 through 2026-08-05.
+# Source: user-provided Korean Path of Exile Ctrl+C clipboard text, 2026-07-31 through 2026-08-15.
 # Only line endings were normalized. These lines are not derived from an external catalog.
 # Format: verbatim implicit text<TAB>canonical id<TAB>observed count
 인접 지역들 내 희귀 몬스터 수 30% 증가	adj-rare-1	4
@@ -44,3 +44,4 @@
 인접 지역들에서 떨어지는 반지가 20% 확률로 고유 반지로 떨어짐	adj-uring-2	1
 인접 지역들에서 떨어지는 아이템이 2% 확률로 분열된 등급	adj-fracture	1
 앗지리의 영향력	adj-atziri	1
+모든 항해 지역에서 발견하는 플라스크가 100%의 확률로 20% 퀄리티로 떨어짐	voy-flask	1

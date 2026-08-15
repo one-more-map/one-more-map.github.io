@@ -61,8 +61,8 @@ const adjacentImplicits: VoyageModDef[] = [
   { id: 'adj-magic-2', text: '60% increased Magic Monsters', aliases: ['인접 지역들 내 마법 몬스터 수 60% 증가'], scope: 'adjacent', effects: [{ stat: 'magicmonsters', percent: 60 }] },
   { id: 'adj-rare-1', text: '30% increased number of Rare Monsters', aliases: ['인접 지역들 내 희귀 몬스터 수 30% 증가'], scope: 'adjacent', effects: [{ stat: 'rares', percent: 30 }] },
   { id: 'adj-rare-2', text: '60% increased number of Rare Monsters', aliases: ['인접 지역들 내 희귀 몬스터 수 60% 증가'], scope: 'adjacent', effects: [{ stat: 'rares', percent: 60 }] },
-  { id: 'adj-msg-1', short: '+1 Message', text: 'Adjacent Areas contain an additional Message in a Bottle', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 12 }] },
-  { id: 'adj-msg-2', short: '+2 Messages', text: 'Adjacent Areas contain 2 additional Messages in Bottles', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 22 }] },
+  { id: 'adj-msg-1', short: '+1 Message', text: 'Adjacent Areas contain an additional Message in a Bottle', aliases: ['인접 지역들에 병 안의 서신 1개 추가 등장'], scope: 'adjacent', effects: [{ stat: 'treasure', percent: 12 }] },
+  { id: 'adj-msg-2', short: '+2 Messages', text: 'Adjacent Areas contain 2 additional Messages in Bottles', aliases: ['인접 지역들에 병 안의 서신 2개 추가 등장'], scope: 'adjacent', effects: [{ stat: 'treasure', percent: 22 }] },
   { id: 'adj-fish', short: 'Exotic Fish', text: 'Adjacent Areas contain highly prized and exotic Fish', scope: 'adjacent', effects: [{ stat: 'treasure', percent: 20 }] },
   { id: 'adj-wisps-1', short: '2000 Wisps', text: 'Monsters have a chance to be Empowered by 2000 Wildwood Wisps', aliases: ['몬스터가 일정 확률로 야생림 도깨비불 2000마리로 강화'], scope: 'adjacent', effects: [{ stat: 'wisps', percent: 30 }] },
   { id: 'adj-wisps-2', short: '4000 Wisps', text: 'Monsters have a chance to be Empowered by 4000 Wildwood Wisps', aliases: ['몬스터가 일정 확률로 야생림 도깨비불 4000마리로 강화'], scope: 'adjacent', effects: [{ stat: 'wisps', percent: 55 }] },
@@ -141,7 +141,7 @@ const voyageImplicits: VoyageModDef[] = [
   { id: 'voy-possess', short: 'Rares Possessed', text: '100% chance for Rare Monsters in Area to be Possessed', aliases: ['모든 항해 지역 내 희귀 몬스터가 100%의 확률로 사로잡힘'], scope: 'global', effects: [{ stat: 'spirits', percent: 100 }] },
   { id: 'voy-essence', short: 'Rares Essenced', text: 'Rare monsters that are natural inhabitants are imprisoned by Essences', aliases: ['모든 항해 지역 내 자연적으로 서식하는 희귀 몬스터가 에센스에 갇힘'], scope: 'global', effects: [{ stat: 'essences', percent: 40 }] },
   { id: 'voy-fracture', short: '50% Rare Fracture', text: '50% chance for Rare Monsters to Fracture on death', scope: 'global', effects: [{ stat: 'rares', percent: 50 }] },
-  { id: 'voy-flask', short: '20% Flask Quality', text: 'Flasks found in all Voyage Areas have 100% chance to have 20% Quality', scope: 'global', effects: [] },
+  { id: 'voy-flask', short: '20% Flask Quality', text: 'Flasks found in all Voyage Areas have 100% chance to have 20% Quality', aliases: ['모든 항해 지역에서 발견하는 플라스크가 100%의 확률로 20% 퀄리티로 떨어짐'], scope: 'global', effects: [] },
 ]
 
 export const VOYAGE_MODS: VoyageModDef[] = [...chartMapMods, ...adjacentImplicits, ...voyageImplicits]

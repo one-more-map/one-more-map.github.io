@@ -1,4 +1,4 @@
-# Source: Korean-client player confirmations, 2026-07-31 through 2026-08-01.
+# Source: Korean-client player confirmations, 2026-07-31 through 2026-08-15.
 # The player confirmed that a previously supplied sentence template remains
 # exact across modifier tiers when only its numeric values change. These are
 # player-confirmed numeric variants, not independent clipboard observations.
@@ -20,3 +20,4 @@
 인접 지역에 게 무리 11(11-14)개 추가 등장	adj-crab-2
 인접 지역들에 첩보원의 금고 3개 추가 등장	adj-opbox-2
 인접 지역들에서 떨어지는 반지가 10% 확률로 고유 반지로 떨어짐	adj-uring-1
+인접 지역들에 병 안의 서신 1개 추가 등장	adj-msg-1

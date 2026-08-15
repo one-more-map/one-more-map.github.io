@@ -48,6 +48,19 @@ describe('Korean clipboard aliases feed strategy readiness', () => {
     expect(html).toContain('1/1× Diviner’s / Operative’s / Message chart (centre)')
   })
 
+  it('counts the observed Korean Message chart for Speedrun', () => {
+    const message = parseKoreanImplicit(
+      '인접 지역들에 병 안의 서신 2개 추가 등장 — 변경이 불가능한 값',
+    )
+
+    expect(message.modIds).toEqual(['adj-msg-2'])
+
+    const html = renderStrategy('milky-speedrun', [message])
+
+    expect(html).toContain('class="strat-ready"')
+    expect(html).toContain('1/1× Diviner’s / Operative’s / Message chart (centre)')
+  })
+
   it('subtracts Korean Wisp and Golden Lantern charts from Magic Ethereal shortages', () => {
     const wisp = parseKoreanImplicit(
       '몬스터가 일정 확률로 야생림 도깨비불 2000마리로 강화',
