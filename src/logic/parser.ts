@@ -121,13 +121,17 @@ function normalizeLookupText(text: string): string {
 
 /** Alias matching ignores a rolled value when the clipboard also includes
  * its invariant range (for example, both 8(8-10) and 9(8-10) become 8-10).
+ * The Korean client can also append "— 변경이 불가능한 값" to an advanced
+ * item-detail line; ignore that exact trailing annotation for lookup only.
  * Keep this separate from general lookup normalization: shape lookup and the
  * verbatim implicit text must not be changed by roll normalization. */
 function normalizeAliasText(text: string): string {
-  return normalizeLookupText(text).replace(
-    /\d+(?:\.\d+)?\s*\(\s*(\d+(?:\.\d+)?)\s*[-‐‑‒–—―−~～]\s*(\d+(?:\.\d+)?)\s*\)/g,
-    '$1-$2',
-  )
+  return normalizeLookupText(text)
+    .replace(/\s*—\s*변경이 불가능한 값\s*$/u, '')
+    .replace(
+      /\d+(?:\.\d+)?\s*\(\s*(\d+(?:\.\d+)?)\s*[-‐‑‒–—―−~～]\s*(\d+(?:\.\d+)?)\s*\)/g,
+      '$1-$2',
+    )
 }
 
 function dialectForItem(item: string): ClipboardDialect | undefined {

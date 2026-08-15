@@ -6,6 +6,7 @@ import koreanChart from './__fixtures__/charted.ko.txt?raw'
 import latestKoreanCharts from './__fixtures__/charted.latest.ko.txt?raw'
 import koreanImplicitAliases from './__fixtures__/implicit-aliases.ko.tsv?raw'
 import koreanNumericTierAliases from './__fixtures__/numeric-tier-aliases.ko.tsv?raw'
+import koreanUnmodifiableAliases from './__fixtures__/implicit-unmodifiable.ko.tsv?raw'
 import koreanUncharted from './__fixtures__/uncharted.ko.txt?raw'
 import { isChartClipboardText, parseChartText } from './parser'
 
@@ -38,6 +39,17 @@ const koreanNumericTierAliasCases = koreanNumericTierAliases
       throw new Error(`Malformed Korean numeric-tier alias fixture row: ${line}`)
     }
     return { rawText, modId }
+  })
+
+const koreanUnmodifiableAliasCases: KoreanImplicitAliasCase[] = koreanUnmodifiableAliases
+  .split(/\r?\n/)
+  .filter((line) => line && !line.startsWith('#'))
+  .map((line) => {
+    const [rawText, modId, occurrencesText] = line.split('\t')
+    if (!rawText || !modId || !occurrencesText) {
+      throw new Error(`Malformed Korean unmodifiable alias fixture row: ${line}`)
+    }
+    return { rawText, modId, occurrences: Number(occurrencesText) }
   })
 
 function parseOnlyChart(text: string): ChartData {
@@ -289,6 +301,24 @@ describe('parseChartText', () => {
       expect(chart.modIds, rawText).toEqual([modId])
       expect(chart.implicitText, rawText).toBe(rawText)
     }
+  })
+
+  it('ignores the Korean unmodifiable-value annotation only while matching aliases', () => {
+    expect(koreanUnmodifiableAliasCases).toHaveLength(10)
+    expect(
+      koreanUnmodifiableAliasCases.reduce((sum, entry) => sum + entry.occurrences, 0),
+    ).toBe(24)
+
+    for (const { rawText, modId } of koreanUnmodifiableAliasCases) {
+      const chart = parseOnlyChart(koreanChart.replace(KOREAN_CHARTED_IMPLICIT, rawText))
+      expect(chart.modIds, rawText).toEqual([modId])
+      expect(chart.implicitText, rawText).toBe(rawText)
+    }
+
+    const unknown = '아직 등록되지 않은 한국어 항해 속성 — 변경이 불가능한 값'
+    const chart = parseOnlyChart(koreanChart.replace(KOREAN_CHARTED_IMPLICIT, unknown))
+    expect(chart.modIds).toEqual([])
+    expect(chart.implicitText).toBe(unknown)
   })
 
   it('uses the invariant range signature for Korean rolled implicit aliases', () => {
