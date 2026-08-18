@@ -27,11 +27,10 @@ import { ALL_STATS, STAT_LABELS, borderTouches, emptyBoard } from './types'
 /** discrete/guaranteed effects (drops, spawns, conversions) rather than plain % scalars */
 const isNotable = (text: string) => !/^\d+% (increased|more|reduced) /i.test(text)
 
-/** bump the key to show a fresh announcement banner */
-const ANNOUNCE_KEY = 'announce-ocr-borders'
-/** one-time popup: the AHK importer's one-scan borders update (supersedes the
- *  page-2 popup - this one covers both changes for anyone who missed it) */
-const AHK_ALTSCAN_KEY = 'announce-ahk-altscan'
+/** one-time popup: the Windows bulk importer's retirement (GGG's macro rules
+ *  ask for one action per keypress; support couldn't confirm the sweep is
+ *  acceptable, and no tool is worth anyone's account) */
+const AHK_RETIRED_KEY = 'announce-ahk-retired'
 /** issues live here - linked from the header and the update popup */
 const ISSUES_URL = 'https://github.com/one-more-map/one-more-map.github.io/issues'
 
@@ -62,13 +61,13 @@ export default function App() {
     }
   }
   const [showMods, setShowMods] = useState(false)
-  // one-time importer-update popup - returning visitors only (first-timers
-  // download the current script anyway, so mark it seen for them)
+  // one-time importer-retired popup - returning visitors only (first-timers
+  // never had the script, so mark it seen for them)
   const [showAhkNotice, setShowAhkNotice] = useState<boolean>(() => {
     try {
-      if (localStorage.getItem(AHK_ALTSCAN_KEY)) return false
+      if (localStorage.getItem(AHK_RETIRED_KEY)) return false
       if (!localStorage.getItem('onboarding-seen')) {
-        localStorage.setItem(AHK_ALTSCAN_KEY, '1')
+        localStorage.setItem(AHK_RETIRED_KEY, '1')
         return false
       }
       return true
@@ -79,7 +78,7 @@ export default function App() {
   const dismissAhkNotice = () => {
     setShowAhkNotice(false)
     try {
-      localStorage.setItem(AHK_ALTSCAN_KEY, '1')
+      localStorage.setItem(AHK_RETIRED_KEY, '1')
     } catch {
       /* ignore */
     }
@@ -105,13 +104,6 @@ export default function App() {
       /* ignore */
     }
   }
-  const [showAnnounce, setShowAnnounce] = useState<boolean>(() => {
-    try {
-      return !localStorage.getItem(ANNOUNCE_KEY)
-    } catch {
-      return false
-    }
-  })
   const [voyageMsg, setVoyageMsg] = useState('')
   const [preserveConfirm, setPreserveConfirm] = useState<{
     charts: ChartData[]
@@ -464,42 +456,33 @@ export default function App() {
         <div className="onboard-backdrop" onClick={dismissAhkNotice}>
           <div className="onboard ahk-notice" onClick={(e) => e.stopPropagation()}>
             <div className="panel-title">
-              📥 Importer updated - borders in one scan
+              📥 The Windows bulk importer has been retired
               <span className="spacer" />
               <button onClick={dismissAhkNotice}>✕</button>
             </div>
             <p className="tut-body">
-              The game now reveals every border tooltip while <strong>Alt</strong> is held, so
-              the importer reads all 12 borders from a <strong>single screenshot</strong> - a
-              couple of seconds instead of 15-30. No new calibration needed.
+              GGG's macro rules ask that each keypress performs only <strong>one</strong> action
+              that interacts with the game, and there's no clear ruling for tools like this -
+              the bulk sweep sits in a grey area, and no convenience tool is worth risking
+              anyone's account. So the script is gone. If you still have a copy, please stop
+              using it.
             </p>
             <p className="tut-body">
-              Also new: the blank-row skip is configurable (wizard → <em>Sweep speed</em>; set
-              0 if you park charts at the bottom of a page), and the sweep covers both chart
-              pages once the wizard knows your page tabs.
+              Importing still works the compliant way, one chart at a time:{' '}
+              <strong>Ctrl+C a chart in game, then Ctrl+V anywhere on this page</strong> - it
+              imports instantly, and re-pasting a chart you've already imported is detected and
+              skipped. Borders: click each border slot on the board and pick the modifier -
+              about a minute of clicking. Everything else (strategies, solver, planner) is
+              unchanged.
             </p>
-            <ol className="ahk-notice-steps">
-              <li>Re-download the script (button below) and replace your old copy.</li>
-              <li>
-                <strong>Exit the running script</strong> (tray icon → Exit) and start the new
-                one - it doesn't reload itself.
-              </li>
-              <li>
-                Haven't set the page tabs yet? Rerun the wizard once (tray →{' '}
-                <em>Setup wizard…</em>). Existing calibration is kept.
-              </li>
-            </ol>
             <div className="sw-actions">
-              <a className="ahk-notice-dl" href="/voyage-import.ahk" download onClick={dismissAhkNotice}>
-                ⬇ Download the updated script
-              </a>
               <span className="spacer" />
               <button onClick={dismissAhkNotice}>Got it</button>
             </div>
             <div className="muted small-note">
-              Something misbehaving?{' '}
+              Questions?{' '}
               <a href={ISSUES_URL} target="_blank" rel="noopener noreferrer">
-                Report it on GitHub
+                GitHub issues
               </a>{' '}
               - actively monitored.
             </div>
@@ -585,30 +568,6 @@ export default function App() {
           <button onClick={share}>{shareMsg || 'Share layout'}</button>
         </div>
       </header>
-
-      {showAnnounce && (
-        <div className="announce-banner">
-          <span>
-            🆕 <strong>OCR border import is live!</strong> The Windows bulk importer now reads all
-            12 border modifiers straight off your screen - grab the updated script in the Import
-            panel.
-          </span>
-          <button
-            className="announce-close"
-            title="Dismiss"
-            onClick={() => {
-              setShowAnnounce(false)
-              try {
-                localStorage.setItem(ANNOUNCE_KEY, '1')
-              } catch {
-                /* ignore */
-              }
-            }}
-          >
-            ✕
-          </button>
-        </div>
-      )}
 
       <main>
         <section className="col library-col">

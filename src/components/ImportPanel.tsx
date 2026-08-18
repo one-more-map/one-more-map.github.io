@@ -31,9 +31,8 @@ export function ImportPanel({ onImport, state, onLoadState }: Props) {
       return
     }
 
-    // Re-running the bulk importer re-copies the same physical charts, and
-    // importing those re-scans again created phantom duplicates the solver
-    // then placed as "the same chart twice" (issue #46)
+    // Re-pasting charts that are already in the library created phantom
+    // duplicates the solver then placed as "the same chart twice" (issue #46)
     const { fresh, skipped } = dedupeNewCharts(state.pool, charts)
 
     if (borderOcr.blockCount > 0) {
@@ -67,15 +66,15 @@ export function ImportPanel({ onImport, state, onLoadState }: Props) {
           + ' (use "Clear all charts" first for a fresh import)',
       )
     // distinct physical charts always differ in their rolled values, so a big
-    // batch of byte-identical imports means the bulk importer's mouse hovered
-    // one item the whole sweep - bad grid calibration (issue #20)
+    // batch of byte-identical imports means the same item text was repeated
+    // (issue #20)
     if (charts.length >= 5) {
       const key = (c: ChartData) =>
         JSON.stringify([c.name, c.level, c.modIds, c.implicitText, c.rewards, c.shape, c.rawText])
       const first = key(charts[0])
       if (charts.every((c) => key(c) === first))
         parts.push(
-          `⚠ all ${charts.length} are IDENTICAL - if this came from the bulk importer, its grid calibration is off (re-run the setup wizard, then Clear all charts and re-import)`,
+          `⚠ all ${charts.length} are IDENTICAL - the same chart text seems to have been pasted repeatedly`,
         )
     }
     if (borderOcr.blockCount > 0) {
@@ -159,7 +158,7 @@ export function ImportPanel({ onImport, state, onLoadState }: Props) {
       <textarea
         rows={5}
         placeholder={
-          'Copy a chart in game (Ctrl+C), then press Ctrl+V anywhere on this page to import it. The Windows bulk importer also fills all 12 border modifiers with local OCR.'
+          'Copy a chart in game (Ctrl+C), then press Ctrl+V anywhere on this page to import it - name, level, modifiers and shape all come along.'
         }
         value={text}
         onChange={(e) => setText(e.target.value)}
@@ -222,85 +221,23 @@ export function ImportPanel({ onImport, state, onLoadState }: Props) {
         </div>
       </details>
 
-      <details className="ahk-help">
-        <summary>🖱️ Bulk-import charts + board borders from PoE (Windows OCR)</summary>
-        <p className="muted">
-          A self-contained AutoHotkey script copies every chart, reads all 12 board-border
-          tooltips with Windows OCR, and pastes everything here in one go. OCR stays on your PC;
-          no screenshots are uploaded.
-        </p>
-        <a className="ahk-dl" href={`${import.meta.env.BASE_URL}voyage-import.ahk`} download>
-          ⬇ Download voyage-import.ahk
-        </a>
-        <details className="ahk-faq">
-          <summary>Is this allowed under GGG's third-party policy?</summary>
-          <p className="muted small">
-            Our read: yes. GGG's macro rules govern inputs that affect the game, and the
-            importer's sweep is read-only - mouse hovers and Ctrl+C copies (the same primitive
-            Awakened PoE Trade sends on every price-check), plus holding Alt to reveal tooltips
-            for the screenshot. Nothing is moved, used, created or decided in-game; your
-            character and stash are identical before and after a run. The only real UI
-            interaction is flipping the chart panel's page tab, which the script flips back when
-            done. Invocation is always your own keypress - nothing ever triggers from timers or
-            screen-watching.
-          </p>
-          <p className="muted small">
-            That said, this is our interpretation, not a GGG ruling. If GGG ever indicates
-            otherwise, the tool will change immediately. And if you'd rather not use the importer
-            at all, everything works by hand - the solver itself is just a webpage you paste item
-            text into; it never touches the game.
-          </p>
-        </details>
-        <ol className="ahk-steps">
-          <li>
-            Install{' '}
-            <a href="https://www.autohotkey.com/" target="_blank" rel="noopener noreferrer">
-              AutoHotkey v2
-            </a>{' '}
-            (Windows only).
-          </li>
-          <li>
-            In PoE (Windowed or Windowed Fullscreen), open the Voyage board so your chart panel is
-            fully visible and not scrolled.
-          </li>
-          <li>
-            Keep this tab open - the script finds it by its title, <em>Allflame Voyage Solver</em>.
-            Click once on this page first so it has focus.
-          </li>
-          <li>
-            Double-click the script - a <strong>setup wizard</strong> opens on first run and walks
-            you through calibrating the chart grid, the two chart-page tabs and all 12 border
-            positions, step by step, with live progress. (Rerun it any time: tray icon →{' '}
-            <em>Setup wizard…</em> - existing users: rerun it once to add the page tabs, then the
-            sweep scans both pages automatically.)
-          </li>
-          <li>
-            Daily use: <kbd>F9</kbd> copies the charts, scans the 12 borders with OCR, and imports
-            both · <kbd>Shift+F9</kbd> imports just the borders · <kbd>F10</kbd> aborts. Border OCR
-            can take around 15–30 seconds on a 4K screen.
-          </li>
-          <li>
-            Don't like the keys? Tray icon → <em>Keybinds…</em> - every hotkey is rebindable and
-            saved between sessions. Calibration keys only work while the wizard is open, so they
-            can't collide with your PoE binds mid-map.
-          </li>
-        </ol>
-        <p className="muted small">
-          If PoE runs as administrator, run the script as administrator too, or its keypresses
-          won't reach the game. Don't touch the mouse or keyboard while it's running.
-        </p>
-        <p className="muted small">
-          Problems or ideas?{' '}
-          <a
-            href="https://github.com/one-more-map/one-more-map.github.io/issues"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Open a GitHub issue
-          </a>{' '}
-          - actively monitored, and pull requests are welcome.
-        </p>
-      </details>
+      <p className="muted small">
+        The Windows bulk importer has been retired: GGG's macro rules ask for one action per
+        keypress and there's no clear ruling for tools like it - a grey area isn't worth
+        anyone's account. Ctrl+C each chart in game and Ctrl+V it here instead; borders are
+        entered by clicking the slots on the board.
+      </p>
+      <p className="muted small">
+        Problems or ideas?{' '}
+        <a
+          href="https://github.com/one-more-map/one-more-map.github.io/issues"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Open a GitHub issue
+        </a>{' '}
+        - actively monitored, and pull requests are welcome.
+      </p>
     </div>
   )
 }

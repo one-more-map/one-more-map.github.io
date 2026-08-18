@@ -13,6 +13,13 @@ export interface UpdateEntry {
 
 export const UPDATES: UpdateEntry[] = [
   {
+    date: '2026-08-16',
+    tag: 'reworked',
+    title: 'Windows bulk importer retired',
+    detail:
+      "GGG's macro rules ask that one keypress performs one game action, and there's no clear ruling for tools like the importer - it sits in a grey area, and no convenience tool is worth anyone's account, so the script has been removed. If you still have a copy, please stop using it. Importing still works the compliant way: Ctrl+C a chart in game, Ctrl+V anywhere on the page (re-pastes are skipped automatically). Borders are a minute of clicking on the board. Strategies, solver and planner are unchanged.",
+  },
+  {
     date: '2026-08-14',
     tag: 'new',
     title: 'HDR-aware border capture (experimental)',

@@ -1,5 +1,4 @@
-import { describe, expect, it } from 'vitest'
-import ahkImporter from '../../public/voyage-import.ahk?raw'
+﻿import { describe, expect, it } from 'vitest'
 import { KOREAN_BORDER_MOD_EVIDENCE } from '../data/borderMods.ko'
 import { borderModById } from '../data/mods'
 import { parseBorderOcrPayload } from './borderOcr'
@@ -113,37 +112,5 @@ describe('Korean border OCR matching', () => {
 
     expect(result.matches).toEqual([])
     expect(result.misses).toHaveLength(1)
-  })
-})
-
-describe('Korean Windows OCR selection in the AHK importer', () => {
-  it('detects the Korean PoE executable and passes a language hint to the helper', () => {
-    expect(ahkImporter).toContain('PreferredOcrLanguage()')
-    expect(ahkImporter).toContain('WinGetProcessName(PoeWinTitle)')
-    expect(ahkImporter).toContain('RegExMatch(processName, "i)_KG\\.exe$")')
-    expect(ahkImporter).toContain('return "ko-KR"')
-    expect(ahkImporter).toContain(' -PreferredLanguage ')
-  })
-
-  it('accepts both ko and ko-KR Windows recognizer tags before English fallback', () => {
-    const preferredBranch = ahkImporter.indexOf(
-      "if (-not [string]::IsNullOrWhiteSpace($PreferredLanguage))",
-    )
-    const englishBranch = ahkImporter.indexOf('$english = @($available')
-
-    expect(preferredBranch).toBeGreaterThan(-1)
-    expect(englishBranch).toBeGreaterThan(preferredBranch)
-    expect(ahkImporter).toContain("$preferredPrimary = ($preferredTag -split '-', 2)[0]")
-    expect(ahkImporter).toContain('$tag -ieq $preferredTag -or $primary -ieq $preferredPrimary')
-  })
-
-  it('uses the selected language in image and persistent-server modes', () => {
-    const calls = ahkImporter.match(
-      /New-OcrEngine -PreferredLanguage \$PreferredLanguage/g,
-    )
-
-    expect(calls).toHaveLength(2)
-    expect(ahkImporter).toContain('. languageArg')
-    expect(ahkImporter).toContain('A_Args.Length >= 3')
   })
 })

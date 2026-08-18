@@ -1,5 +1,5 @@
 name: Bug report
-description: Something broken in the solver site or the AHK importer
+description: Something broken in the solver site
 body:
   - type: textarea
     id: what-happened
@@ -9,17 +9,14 @@ body:
     validations:
       required: true
   - type: textarea
-    id: diagnostics
+    id: chart-text
     attributes:
-      label: Diagnostic bundle (for importer problems)
+      label: Chart text (for import problems)
       description: >
-        If the AHK importer is involved, right-click its tray icon, choose
-        "Save diagnostic bundle...", and drag the zip from your desktop into
-        this box. It contains your calibration, an activity log, the last scan
-        results, and - only if you answered yes - the last scan screenshots.
-        This usually turns three rounds of questions into a one-reply fix.
+        If a chart imports wrongly, paste its full Ctrl+C item text here so the
+        exact case can be reproduced.
   - type: input
     id: display
     attributes:
       label: Display setup
-      placeholder: e.g. 2560x1440, 125% scaling, HDR on, 2 monitors
+      placeholder: e.g. 2560x1440, 125% scaling, 2 monitors

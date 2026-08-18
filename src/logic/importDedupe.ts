@@ -8,9 +8,8 @@ export interface DedupeResult {
 }
 
 /**
- * Re-running the bulk importer re-copies every chart still in the game tab,
- * so an incoming chart whose verbatim text matches one already in the library
- * is a RE-SCAN of the same physical item, not a second copy - importing it
+ * An incoming chart whose verbatim text matches one already in the library is
+ * a RE-PASTE of the same physical item, not a second copy - importing it
  * again put phantom duplicates in the pool and the solver then "used the same
  * chart twice" (issue #46). Matching is count-aware per verbatim rawText:
  * copies beyond what the library already holds still import, so owning two

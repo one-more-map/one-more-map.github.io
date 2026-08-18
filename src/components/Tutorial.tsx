@@ -31,9 +31,9 @@ const STEPS: Step[] = [
     where: 'Chart Library (left column) and the Import panel below it',
     target: '.library-col',
     body: [
-      'Quick way: Ctrl+C a chart in game, then Ctrl+V anywhere on this page. It imports instantly - name, level, modifiers, shape, everything.',
-      'Whole collection: download the Windows bulk importer from the Import panel. Its first-run wizard calibrates your chart grid once; after that one hotkey (F9) sweeps every chart AND reads all 12 board borders with local OCR in seconds.',
-      'Works with English and Korean clients. Rare charts trigger a golden alert so you know Divine fuel arrived.',
+      'Ctrl+C a chart in game, then Ctrl+V anywhere on this page. It imports instantly - name, level, modifiers, shape, everything - and re-pasting a chart you already imported is skipped automatically.',
+      'Work through your chart panel one item at a time; a full collection takes a couple of minutes. Works with English and Korean clients.',
+      'Rare charts trigger a golden alert so you know Divine fuel arrived.',
     ],
   },
   {
@@ -42,8 +42,8 @@ const STEPS: Step[] = [
     where: 'The board (middle) - the small slots around its edge',
     target: '.board-grid',
     body: [
-      'Border modifiers (Corruption Currents) only affect the tiles they touch, so the solver needs to know them. The bulk importer fills all 12 automatically.',
-      'By hand: click any border slot and search. Corners touch 2 tiles, edges 1.',
+      'Border modifiers (Corruption Currents) only affect the tiles they touch, so the solver needs to know them.',
+      'Click any border slot and search for the modifier. Corners touch 2 tiles, edges 1 - all 12 take about a minute.',
       'Watch for the jackpot: a "+1 Divine Orb per Rare Monster" border turns a rares board into a money printer - the site flags it loudly when you enter one.',
     ],
   },
