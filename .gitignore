@@ -5,4 +5,4 @@ dist/
 *.ahk
 voyage-import*.ini
 # ...but the downloadable copy served by the site IS tracked
-!public/voyage-import.ahk
+!public/voyage-clip-collector.ahk
