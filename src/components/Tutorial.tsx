@@ -32,7 +32,7 @@ const STEPS: Step[] = [
     target: '.library-col',
     body: [
       'Ctrl+C a chart in game, then Ctrl+V anywhere on this page. It imports instantly - name, level, modifiers, shape, everything - and re-pasting a chart you already imported is skipped automatically.',
-      'Work through your chart panel one item at a time; a full collection takes a couple of minutes. Works with English and Korean clients.',
+      'Big library? The optional chart collector (Import panel) counts your own Ctrl+C copies with an on-screen tally and imports them all in one paste - it sends zero inputs to the game. Works with English and Korean clients.',
       'Rare charts trigger a golden alert so you know Divine fuel arrived.',
     ],
   },

@@ -475,6 +475,11 @@ export default function App() {
               about a minute of clicking. Everything else (strategies, solver, planner) is
               unchanged.
             </p>
+            <p className="tut-body">
+              Big library? The new <strong>chart collector</strong> (Import panel) counts your
+              own Ctrl+C copies with an on-screen tally and imports them here in one paste - it
+              sends zero inputs to the game, every keypress is yours.
+            </p>
             <div className="sw-actions">
               <span className="spacer" />
               <button onClick={dismissAhkNotice}>Got it</button>

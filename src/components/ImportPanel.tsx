@@ -221,11 +221,47 @@ export function ImportPanel({ onImport, state, onLoadState }: Props) {
         </div>
       </details>
 
+      <details className="ahk-help">
+        <summary>📋 Chart collector - one paste for your whole library (Windows)</summary>
+        <p className="muted">
+          A tiny optional helper that <strong>never sends a single input to the game</strong> -
+          no keystrokes, no clicks, nothing. You press every Ctrl+C yourself; it only watches
+          the clipboard you copied to (like the trade overlays do), counts the charts, and
+          hands this page one combined paste at the end.
+        </p>
+        <a
+          className="ahk-dl"
+          href={`${import.meta.env.BASE_URL}voyage-clip-collector.ahk`}
+          download
+        >
+          ⬇ Download voyage-clip-collector.ahk
+        </a>
+        <ol className="ahk-steps">
+          <li>
+            Install{' '}
+            <a href="https://www.autohotkey.com/" target="_blank" rel="noopener noreferrer">
+              AutoHotkey v2
+            </a>{' '}
+            and run the script (it lives in the tray).
+          </li>
+          <li>
+            Press <kbd>F7</kbd> - copy mode on, a counter appears on screen.
+          </li>
+          <li>
+            In PoE, hover each chart and press <kbd>Ctrl+C</kbd> yourself - the counter ticks
+            up. Non-chart items and accidental double-copies are ignored.
+          </li>
+          <li>
+            Press <kbd>F7</kbd> again, switch here once, <kbd>Ctrl+V</kbd> - the whole batch
+            imports in one paste (charts already in your library are skipped).
+          </li>
+        </ol>
+      </details>
       <p className="muted small">
-        The Windows bulk importer has been retired: GGG's macro rules ask for one action per
-        keypress and there's no clear ruling for tools like it - a grey area isn't worth
-        anyone's account. Ctrl+C each chart in game and Ctrl+V it here instead; borders are
-        entered by clicking the slots on the board.
+        The old bulk importer stays retired: GGG's macro rules ask for one action per keypress
+        and there's no clear ruling for tools like it - a grey area isn't worth anyone's
+        account. The collector above is different: every keypress is your own, and it sends
+        nothing to the game.
       </p>
       <p className="muted small">
         Problems or ideas?{' '}

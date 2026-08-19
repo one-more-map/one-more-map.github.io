@@ -205,4 +205,18 @@ const noisyRarePerConnection = parseBorderOcrPayload(
 )
 assert.equal(noisyRarePerConnection.matches[0]?.id, 'b-rareconn-1')
 
-console.log('Border OCR regression: 64/64 current tooltips and 12/12 aliases matched')
+// The chart collector's whole compliance story is that it never sends any
+// input to the game: it may watch the clipboard the player copied to, but
+// game-input primitives must never appear in it.
+const collector = fs
+  .readFileSync(require.resolve('../public/voyage-clip-collector.ahk'), 'utf8')
+  .replace(/\r\n?/g, '\n')
+assert.match(collector, /OnClipboardChange/)
+assert.match(collector, /아이템 종류/, 'must recognise Korean chart headers')
+assert.doesNotMatch(
+  collector,
+  /\b(Send|SendInput|SendEvent|SendText|Click|MouseMove|MouseClick|ControlSend|ControlClick|WinActivate|PostMessage|SendMessage)\b/,
+  'the collector must never contain a game-input primitive',
+)
+
+console.log('Border OCR regression: 64/64 current tooltips and 12/12 aliases matched; collector is input-free')
