@@ -476,9 +476,10 @@ export default function App() {
               unchanged.
             </p>
             <p className="tut-body">
-              Big library? The new <strong>chart collector</strong> (Import panel) counts your
-              own Ctrl+C copies with an on-screen tally and imports them here in one paste - it
-              sends zero inputs to the game, every keypress is yours.
+              Big library? The new <strong>chart + border collector</strong> (Import panel)
+              counts your own Ctrl+C copies with an on-screen tally, reads all 12 borders from
+              a screenshot you take with Alt held (F8), and imports everything here in one
+              paste - it sends zero inputs to the game, every keypress is yours.
             </p>
             <div className="sw-actions">
               <span className="spacer" />

@@ -13,11 +13,11 @@ export interface UpdateEntry {
 
 export const UPDATES: UpdateEntry[] = [
   {
-    date: '2026-08-18',
+    date: '2026-08-19',
     tag: 'new',
-    title: 'Chart collector - one paste for your whole library',
+    title: 'Chart + border collector - one paste for everything',
     detail:
-      'New optional Windows helper that sends zero inputs to the game: press F7, Ctrl+C each chart yourself (an on-screen counter ticks up, non-charts and double-copies are ignored), press F7 again and Ctrl+V here once - the whole batch imports in one paste. Every keypress is your own; it only reads the clipboard you copied to, like the trade overlays. Community idea from GitHub. Find it in the Import panel.',
+      'New optional Windows helper that sends zero inputs to the game: F7 toggles chart copy mode (Ctrl+C each chart yourself, an on-screen counter ticks up), F8 reads all 12 borders from a screenshot taken while YOU hold Alt (a beep says when to let go; Windows OCR runs locally, nothing is uploaded). Then one Ctrl+V here imports charts and borders together. Every keypress is your own - it only listens. Community idea from GitHub. Find it in the Import panel.',
   },
   {
     date: '2026-08-16',

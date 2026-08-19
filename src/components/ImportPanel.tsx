@@ -222,12 +222,13 @@ export function ImportPanel({ onImport, state, onLoadState }: Props) {
       </details>
 
       <details className="ahk-help">
-        <summary>📋 Chart collector - one paste for your whole library (Windows)</summary>
+        <summary>📋 Chart + border collector - one paste for everything (Windows)</summary>
         <p className="muted">
           A tiny optional helper that <strong>never sends a single input to the game</strong> -
-          no keystrokes, no clicks, nothing. You press every Ctrl+C yourself; it only watches
-          the clipboard you copied to (like the trade overlays do), counts the charts, and
-          hands this page one combined paste at the end.
+          no keystrokes, no clicks, nothing. You press every key yourself; it only listens: to
+          the clipboard you copied to (like the trade overlays do), and to a screenshot taken
+          while <em>you</em> hold Alt. OCR runs locally with Windows' built-in reader - nothing
+          is uploaded.
         </p>
         <a
           className="ahk-dl"
@@ -252,8 +253,13 @@ export function ImportPanel({ onImport, state, onLoadState }: Props) {
             up. Non-chart items and accidental double-copies are ignored.
           </li>
           <li>
-            Press <kbd>F7</kbd> again, switch here once, <kbd>Ctrl+V</kbd> - the whole batch
-            imports in one paste (charts already in your library are skipped).
+            Borders: <strong>hold Alt</strong> so all 12 border tooltips show, press{' '}
+            <kbd>F8</kbd>, and let go when it beeps - the tooltips are read locally and join
+            the batch.
+          </li>
+          <li>
+            Press <kbd>F7</kbd> again, switch here once, <kbd>Ctrl+V</kbd> - charts and
+            borders import in one paste (charts already in your library are skipped).
           </li>
         </ol>
       </details>

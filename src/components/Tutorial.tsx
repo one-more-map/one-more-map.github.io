@@ -44,6 +44,7 @@ const STEPS: Step[] = [
     body: [
       'Border modifiers (Corruption Currents) only affect the tiles they touch, so the solver needs to know them.',
       'Click any border slot and search for the modifier. Corners touch 2 tiles, edges 1 - all 12 take about a minute.',
+      'Faster: with the collector running (Import panel), hold Alt in game and press F8 - all 12 tooltips are read from a screenshot with local OCR and pasted in one go. Zero inputs to the game.',
       'Watch for the jackpot: a "+1 Divine Orb per Rare Monster" border turns a rares board into a money printer - the site flags it loudly when you enter one.',
     ],
   },
