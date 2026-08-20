@@ -214,7 +214,17 @@ const collector = fs
   .replace(/\r\n?/g, '\n')
 assert.match(collector, /OnClipboardChange/)
 assert.match(collector, /아이템 종류/, 'must recognise Korean chart headers')
-assert.match(collector, /F8:: RunBorderScan/, 'F8 border scan must exist')
+assert.match(
+  collector,
+  /\*F8:: RunBorderScan/,
+  'F8 must use the wildcard prefix - it is pressed WHILE Alt is held (issue #48)',
+)
+assert.match(collector, /\+F7:: ToggleMute/, 'Shift+F7 mute toggle must exist')
+assert.strictEqual(
+  (collector.match(/\bSoundBeep\b/g) || []).length,
+  1,
+  'every beep must route through the mute-aware Beep() wrapper',
+)
 assert.doesNotMatch(
   collector,
   /\b(Send|SendInput|SendEvent|SendText|Click|MouseMove|MouseClick|ControlSend|ControlClick|WinActivate|PostMessage|SendMessage)\b/,

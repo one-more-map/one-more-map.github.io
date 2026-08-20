@@ -28,9 +28,14 @@ CoordMode "ToolTip", "Screen"
 ;
 ;  Then ONE Ctrl+V on the solver page imports charts + borders.
 ;  English and Korean clients are both supported.
+;
+;  Shift+F7 mutes/unmutes the beeps (the on-screen counter still works).
+;
+;  If PoE runs as administrator, run this script as administrator too,
+;  or its hotkeys won't register while the game window is focused.
 ; =====================================================================
 
-CollectorVersion := "2026-08-19"
+CollectorVersion := "2026-08-20"
 PoeWinTitle := "Path of Exile"
 
 Collecting := false
@@ -38,6 +43,22 @@ Collected := []
 LastCaptured := ""
 BorderBlob := ""
 BorderCount := 0
+Muted := false
+
+; every sound goes through here so Shift+F7 can silence the lot
+Beep(freq, dur) {
+    global Muted
+    if !Muted
+        SoundBeep freq, dur
+}
+
+ToggleMute(*) {
+    global Muted
+    Muted := !Muted
+    ToolTip Muted ? "🔇 Beeps muted - Shift+F7 to unmute (the on-screen counter still works)"
+        : "🔊 Beeps back on"
+    SetTimer () => ToolTip(), -2500
+}
 
 ; %TEMP% can arrive as an 8.3 short path (C:\Users\HARDPC~1\...) and WinRT
 ; (which Windows OCR uses to open images) can refuse those - expand it first.
@@ -94,7 +115,7 @@ OnClipChanged(dataType) {
         return
     LastCaptured := text
     Collected.Push(text)
-    SoundBeep 880, 60
+    Beep(880, 60)
     ShowCounter()
 }
 OnClipboardChange OnClipChanged
@@ -126,7 +147,7 @@ ToggleCollect(*) {
     ToolTip note " on the clipboard - Ctrl+V on the solver page to import everything.",
         A_ScreenWidth // 2 - 180, 40
     SetTimer () => ToolTip(), -6000
-    SoundBeep 1200, 90
+    Beep(1200, 90)
     BorderBlob := ""
     BorderCount := 0
 }
@@ -196,7 +217,7 @@ RunBorderScan(testImage := "", testW := 0, testH := 0) {
     while (!FileExist(HelperShot) && ProcessExist(HelperPid) && A_TickCount < deadline)
         Sleep 50
     if FileExist(HelperShot) {
-        SoundBeep 700, 90
+        Beep(700, 90)
         ToolTip "Screenshot taken - you can let go of Alt.`nReading the 12 borders with Windows OCR (all local, nothing uploaded)...",
             A_ScreenWidth // 2 - 180, 40
     }
@@ -211,7 +232,7 @@ RunBorderScan(testImage := "", testW := 0, testH := 0) {
         ToolTip "Border scan failed - you can still enter borders by clicking the board slots.`n"
             . SubStr(blob = "" ? "(no result - timed out?)" : blob, 1, 220)
         SetTimer () => ToolTip(), -7000
-        SoundBeep 300, 150
+        Beep(300, 150)
         return
     }
     total := 0
@@ -230,11 +251,11 @@ RunBorderScan(testImage := "", testW := 0, testH := 0) {
     BorderBlob := blob
     BorderCount := good
     if Collecting {
-        SoundBeep 1000, 90
+        Beep(1000, 90)
         ShowCounter()
     } else {
         A_Clipboard := blob
-        SoundBeep 1200, 90
+        Beep(1200, 90)
         ToolTip "✅ Read " good "/12 borders - Ctrl+V on the solver page to import them."
             . (good < 12 ? "`nMissed ones can be picked by clicking their board slot." : ""),
             A_ScreenWidth // 2 - 180, 40
@@ -243,10 +264,17 @@ RunBorderScan(testImage := "", testW := 0, testH := 0) {
 }
 
 F7:: ToggleCollect()
-F8:: RunBorderScan()
+; * = fire even while modifiers are held: the whole point of F8 is pressing
+; it WHILE Alt is held for the tooltips, and a bare F8 hotkey never fires
+; with a modifier down (issue #48: no beep, and the keypress fell through
+; to the game, where F8 is PoE's own screenshot bind - hence the mystery
+; "screenshot saved" notifications)
+*F8:: RunBorderScan()
++F7:: ToggleMute()
 
 A_TrayMenu.Insert("1&", "Toggle copy mode (F7)", ToggleCollect)
 A_TrayMenu.Insert("2&", "Scan borders now (F8)", RunBorderScan)
+A_TrayMenu.Insert("3&", "Mute beeps (Shift+F7)", ToggleMute)
 A_TrayMenu.Default := "Toggle copy mode (F7)"
 A_IconTip := "Voyage collector - F7 charts, F8 borders"
 TrayTip "Voyage collector ready", "F7 = chart copy mode, F8 = border screenshot scan. This tool never sends any input to the game.", 1
@@ -799,3 +827,4 @@ $utf8Out = [System.Text.UTF8Encoding]::new($false)
 Move-Item -LiteralPath ($OutputPath + '.tmp') -Destination $OutputPath -Force
 )"
 }
+

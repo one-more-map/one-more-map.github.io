@@ -262,6 +262,11 @@ export function ImportPanel({ onImport, state, onLoadState }: Props) {
             borders import in one paste (charts already in your library are skipped).
           </li>
         </ol>
+        <p className="muted small">
+          Beeps too loud? <kbd>Shift+F7</kbd> mutes them - the on-screen counter still works.
+          If PoE runs as administrator, run the collector as administrator too or its hotkeys
+          won't register while the game is focused.
+        </p>
       </details>
       <p className="muted small">
         The old bulk importer stays retired: GGG's macro rules ask for one action per keypress
