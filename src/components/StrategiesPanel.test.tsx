@@ -25,13 +25,18 @@ function parseKoreanArea(area: string): ChartData {
   return result.charts[0]
 }
 
-function renderStrategy(activeId: string, pool: ChartData[]): string {
+function renderStrategy(
+  activeId: string,
+  pool: ChartData[],
+  centerChoice?: Record<string, string>,
+): string {
   return renderToStaticMarkup(
     <StrategiesPanel
       activeId={activeId}
       pool={pool}
       borders={emptyBorders()}
       onSelect={() => undefined}
+      centerChoice={centerChoice}
     />,
   )
 }
@@ -59,6 +64,21 @@ describe('Korean clipboard aliases feed strategy readiness', () => {
 
     expect(html).toContain('class="strat-ready"')
     expect(html).toContain('1/1× Diviner’s / Operative’s / Message chart (centre)')
+  })
+
+  it('centre pick narrows Speedrun readiness to the chosen family (issue #49)', () => {
+    const diviner = parseKoreanImplicit('인접 지역들에 예언자의 금고 3개 추가 등장')
+    expect(diviner.modIds).toEqual(['adj-divbox-2'])
+
+    // a Diviner chart satisfies the default...
+    const anyHtml = renderStrategy('milky-speedrun', [diviner])
+    expect(anyHtml).toContain('class="strat-ready"')
+
+    // ...but not a Message-only centre pick
+    const msgHtml = renderStrategy('milky-speedrun', [diviner], { 'milky-speedrun': 'msg' })
+    expect(msgHtml).toContain('Centre chart')
+    expect(msgHtml).toContain('class="strat-notready"')
+    expect(msgHtml).toContain('1× Message chart (centre)')
   })
 
   it('subtracts Korean Wisp and Golden Lantern charts from Magic Ethereal shortages', () => {

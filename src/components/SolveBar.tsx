@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { solve, type SolverResult } from '../logic/solver'
 import type { AppState } from '../logic/storage'
-import type { StrategyDef } from '../data/strategies'
+import { applyCenterChoice, type StrategyDef } from '../data/strategies'
 import { selectStrategySolvePool } from '../logic/solverPoolSelection'
 
 interface Props {
@@ -40,18 +40,22 @@ export function SolveBar({ state, activeStrategy, results, appliedIdx, onResults
           return chart?.preserved ? { ...placement } : null
         })
         const lockedUids = new Set(locked.filter(Boolean).map((p) => p!.chartUid))
+        // the user's centre-piece pick reshapes rules + readiness (issue #49)
+        const effectiveStrategy = activeStrategy
+          ? applyCenterChoice(activeStrategy, state.centerChoice[activeStrategy.id])
+          : null
         const { solvePool, heldBack, heldBackFor } = selectStrategySolvePool(
           state.pool,
-          activeStrategy,
+          effectiveStrategy,
           state.strategyReservations,
           lockedUids,
           state.pieceKeeps,
         )
         // a strategy with selectable layouts uses the user's pick (or its first)
         const layoutVariant =
-          activeStrategy?.layouts?.find(
-            (v) => v.id === state.layoutChoice[activeStrategy.id],
-          ) ?? activeStrategy?.layouts?.[0]
+          effectiveStrategy?.layouts?.find(
+            (v) => v.id === state.layoutChoice[effectiveStrategy.id],
+          ) ?? effectiveStrategy?.layouts?.[0]
         const res = solve(solvePool, state.borders, weights, {
           mode: state.mode,
           allowRotation: state.allowRotation,
@@ -59,9 +63,9 @@ export function SolveBar({ state, activeStrategy, results, appliedIdx, onResults
           adjacentAffectsSelf: state.adjacentAffectsSelf,
           disabledMods: new Set(state.disabledMods),
           topK: 5,
-          strategyRules: activeStrategy?.rules,
-          strategyLayout: layoutVariant?.layout ?? activeStrategy?.layout,
-          strategyLayoutPenalty: activeStrategy?.layoutPenalty,
+          strategyRules: effectiveStrategy?.rules,
+          strategyLayout: layoutVariant?.layout ?? effectiveStrategy?.layout,
+          strategyLayoutPenalty: effectiveStrategy?.layoutPenalty,
           locked,
         })
         onResults(res)

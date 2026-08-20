@@ -8,15 +8,16 @@ interface Props {
   borders: Borders
   reservations: StrategyReservationPreferences
   pieceKeeps: Record<string, number>
+  centerChoice: Record<string, string>
   onUseStrategy: (id: string) => void
   onClose: () => void
 }
 
 /** Overlay that sequences the whole library into a session of voyages. */
-export function SessionPlanner({ pool, borders, reservations, pieceKeeps, onUseStrategy, onClose }: Props) {
+export function SessionPlanner({ pool, borders, reservations, pieceKeeps, centerChoice, onUseStrategy, onClose }: Props) {
   const plan = useMemo(
-    () => planSession(pool, borders, reservations, pieceKeeps),
-    [pool, borders, reservations, pieceKeeps],
+    () => planSession(pool, borders, reservations, pieceKeeps, centerChoice),
+    [pool, borders, reservations, pieceKeeps, centerChoice],
   )
   const ready = plan.entries.filter((e) => e.status === 'ready')
   const waiting = plan.entries.filter((e) => e.status === 'waiting')

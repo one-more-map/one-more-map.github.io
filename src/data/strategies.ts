@@ -93,6 +93,14 @@ export interface StrategyDef {
   }[]
   /** a border roll the strategy hinges on (readiness warns if not entered) */
   requiresBorderId?: { id: string; label: string }
+  /** selectable centre-piece family (first = default "best available");
+   *  shown as a picker on the card, the choice persists per strategy and
+   *  reshapes the centre rules + readiness (issue #49) */
+  centerOptions?: { id: string; label: string; modIds: string[] }[]
+  /** hard caps on the solve pool: only the best `max` matching charts are
+   *  offered to the solver (e.g. Anchorfield Fishing boards exactly ONE
+   *  Anchorfield however many the library holds - issue #49) */
+  limits?: { modIds?: string[]; areaTypes?: ChartAreaType[]; max: number }[]
   /** what to do instead while pieces are missing */
   waitHint?: string
   /** this strategy is allowed to place rare-implicit charts (Divine strats) */
@@ -306,6 +314,10 @@ export const STRATEGIES: StrategyDef[] = [
     requirements: [
       { areaTypes: ['anchorfield'], count: 1, label: 'Anchorfield chart' },
     ],
+    // "One is all you need": however many Anchorfields the library holds,
+    // only the single best one is offered to the solver (issue #49 - the
+    // any-cell bonus used to stack every Anchorfield onto the board)
+    limits: [{ areaTypes: ['anchorfield'], max: 1 }],
     waitHint: 'Alc & Go or Speedrun until an Anchorfield chart drops - any rarity works.',
     searchRegex: '"anchorfield|m q.*(1[2-9].|[2-9]..)%"',
   },
@@ -351,6 +363,15 @@ export const STRATEGIES: StrategyDef[] = [
     ],
     requirements: [
       { modIds: SPEEDRUN_CENTER_MODS, count: 1, label: 'Diviner’s / Operative’s / Message chart (centre)' },
+    ],
+    // which family may take the centre (issue #49: e.g. spend Messages,
+    // save Diviner's) - the choice reshapes rules + readiness via
+    // applyCenterChoice
+    centerOptions: [
+      { id: 'any', label: 'Best available', modIds: [...SPEEDRUN_CENTER_MODS] },
+      { id: 'opbox', label: 'Operative’s only', modIds: ['adj-opbox-1', 'adj-opbox-2'] },
+      { id: 'msg', label: 'Message only', modIds: ['adj-msg-1', 'adj-msg-2'] },
+      { id: 'divbox', label: 'Diviner’s only', modIds: ['adj-divbox-1', 'adj-divbox-2'] },
     ],
     waitHint: 'Run manual boards until one drops.',
     searchRegex: '"bottle|divine|oper"',
@@ -579,3 +600,37 @@ export const STRATEGIES: StrategyDef[] = [
 ]
 
 export const strategyById = new Map(STRATEGIES.map((s) => [s.id, s]))
+
+/**
+ * Apply the user's centre-piece pick (issue #49): the chosen family gets the
+ * centre bonus, the excluded families are pushed out of the centre, and
+ * readiness asks for the chosen family specifically. The default (first)
+ * option returns the strategy untouched.
+ */
+export function applyCenterChoice(strategy: StrategyDef, choiceId?: string): StrategyDef {
+  const options = strategy.centerOptions
+  if (!options || options.length === 0) return strategy
+  const choice = options.find((o) => o.id === choiceId) ?? options[0]
+  if (choice === options[0]) return strategy
+
+  const allCenterMods = new Set(options[0].modIds)
+  const excluded = options[0].modIds.filter((id) => !choice.modIds.includes(id))
+
+  // strip every rule that touches a centre-family mod, then rebuild them
+  // around the chosen family; rules without modIds (quant edges,
+  // Filthscrabble) pass through untouched
+  const rules = [
+    { cells: CENTER, modIds: choice.modIds, bonus: 55 },
+    { cells: CENTER, modIds: excluded, bonus: -40 },
+    { cells: NOT_CENTER, modIds: options[0].modIds, bonus: -40 },
+    ...strategy.rules.filter(
+      (r) => !r.modIds || !r.modIds.some((id) => allCenterMods.has(id)),
+    ),
+  ]
+  const requirements = (strategy.requirements ?? []).map((req) =>
+    req.modIds?.some((id) => allCenterMods.has(id))
+      ? { ...req, modIds: choice.modIds, label: `${choice.label.replace(' only', '')} chart (centre)` }
+      : req,
+  )
+  return { ...strategy, rules, requirements }
+}

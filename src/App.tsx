@@ -509,6 +509,7 @@ export default function App() {
           borders={state.borders}
           reservations={state.strategyReservations}
           pieceKeeps={state.pieceKeeps}
+          centerChoice={state.centerChoice}
           onUseStrategy={(id) => patch({ strategyId: id })}
           onClose={() => setShowPlanner(false)}
         />
@@ -822,6 +823,10 @@ export default function App() {
             layoutChoice={state.layoutChoice}
             onLayoutChoice={(sid, lid) =>
               patch({ layoutChoice: { ...state.layoutChoice, [sid]: lid } })
+            }
+            centerChoice={state.centerChoice}
+            onCenterChoice={(sid, cid) =>
+              patch({ centerChoice: { ...state.centerChoice, [sid]: cid } })
             }
           />
         </section>

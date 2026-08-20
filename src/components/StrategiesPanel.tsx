@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { STRATEGIES, type StrategyDef } from '../data/strategies'
+import { applyCenterChoice, STRATEGIES, type StrategyDef } from '../data/strategies'
 import type { Borders, ChartData } from '../types'
 
 interface Props {
@@ -10,6 +10,9 @@ interface Props {
   /** chosen layout variant per strategy id (missing = default) */
   layoutChoice?: Record<string, string>
   onLayoutChoice?: (strategyId: string, layoutId: string) => void
+  /** chosen centre-piece family per strategy id (missing = best available) */
+  centerChoice?: Record<string, string>
+  onCenterChoice?: (strategyId: string, choiceId: string) => void
 }
 
 /** per-requirement tally of what the library can supply (shared with the
@@ -92,7 +95,16 @@ function RegexRow({ regex }: { regex: string }) {
   )
 }
 
-export function StrategiesPanel({ activeId, pool, borders, onSelect, layoutChoice, onLayoutChoice }: Props) {
+export function StrategiesPanel({
+  activeId,
+  pool,
+  borders,
+  onSelect,
+  layoutChoice,
+  onLayoutChoice,
+  centerChoice,
+  onCenterChoice,
+}: Props) {
   const [expanded, setExpanded] = useState<string | null>(activeId)
 
   return (
@@ -119,6 +131,8 @@ export function StrategiesPanel({ activeId, pool, borders, onSelect, layoutChoic
       {STRATEGIES.map((s) => {
         const isActive = activeId === s.id
         const isOpen = expanded === s.id
+        // the centre pick reshapes readiness, so the card must reflect it
+        const effective = applyCenterChoice(s, centerChoice?.[s.id])
         return (
           <div key={s.id} className={`strat-card ${isActive ? 'active' : ''}`}>
             <button
@@ -183,8 +197,37 @@ export function StrategiesPanel({ activeId, pool, borders, onSelect, layoutChoic
                   </div>
                 )
               })()}
+            {(isActive || isOpen) &&
+              s.centerOptions &&
+              (() => {
+                const chosen =
+                  s.centerOptions.find((o) => o.id === centerChoice?.[s.id]) ?? s.centerOptions[0]
+                return (
+                  <div className="strat-layouts">
+                    <div className="strat-layouts-row">
+                      <span className="strat-layouts-label">Centre chart</span>
+                      <select
+                        value={chosen.id}
+                        onChange={(e) => onCenterChoice?.(s.id, e.target.value)}
+                      >
+                        {s.centerOptions.map((o) => (
+                          <option key={o.id} value={o.id}>
+                            {o.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    {chosen.id !== s.centerOptions[0].id && (
+                      <div className="strat-layouts-hint muted">
+                        only {chosen.label.replace(' only', '')} charts take the centre - the
+                        other families stay in your library
+                      </div>
+                    )}
+                  </div>
+                )
+              })()}
             {(isActive || isOpen) && s.searchRegex && <RegexRow regex={s.searchRegex} />}
-            {(isActive || isOpen) && <Readiness strategy={s} pool={pool} borders={borders} />}
+            {(isActive || isOpen) && <Readiness strategy={effective} pool={pool} borders={borders} />}
             <button
               className={`strat-use ${isActive ? 'on' : ''}`}
               onClick={() => onSelect(isActive ? null : s.id)}

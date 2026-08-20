@@ -68,6 +68,7 @@ export function planSession(
   borders: Borders,
   preferences: StrategyReservationPreferences = defaultStrategyReservations(),
   pieceKeeps: Record<string, number> = {},
+  centerChoice: Record<string, string> = {},
 ): SessionPlan {
   const used = new Set<string>()
   const entries: PlanEntry[] = []
@@ -124,18 +125,24 @@ export function planSession(
 
   // ---- Speedrun repeats: one centre chart + 8 spares each ----
   const speedrun = byId.get('milky-speedrun') as StrategyDef
+  // the user's centre pick (issue #49) restricts which family a run's centre
+  // may come from; the other families are still never burned as sides
+  const chosenCenter =
+    speedrun.centerOptions?.find((o) => o.id === centerChoice[speedrun.id]) ??
+    speedrun.centerOptions?.[0]
+  const centerMods = chosenCenter ? chosenCenter.modIds : [...SPEEDRUN_CENTER_MODS]
   let speedrunRuns = 0
   for (;;) {
     const spendable = selectStrategySolvePool(remaining(), speedrun, preferences, undefined, pieceKeeps).solvePool
     const isCentre = (c: ChartData) =>
       c.modIds.some((id) => SPEEDRUN_CENTER_MODS.includes(id))
     const centres = spendable.filter(isCentre)
-    const centre = centres[0]
+    const centre = centres.find((c) => c.modIds.some((id) => centerMods.includes(id)))
     if (!centre) break
     // sides never waste a spare centre chart - those seed the NEXT run
     const sides = [
       ...spendable.filter((c) => !isCentre(c)),
-      ...centres.slice(1),
+      ...centres.filter((c) => c.uid !== centre.uid),
     ].slice(0, 8)
     if (sides.length < 8) break
     used.add(centre.uid)

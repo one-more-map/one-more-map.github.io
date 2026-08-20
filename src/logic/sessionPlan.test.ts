@@ -29,6 +29,21 @@ const meatfishKit = () => [
 ]
 
 describe('session planner', () => {
+  it('speedrun centre restriction skips runs whose centre family is excluded (issue #49)', () => {
+    const pool = [chart(['adj-divbox-2']), ...junk(8)]
+
+    // default: the Diviner chart takes the centre and one run is planned
+    const anyPlan = planSession(pool, emptyBorders())
+    expect(anyPlan.entries.find((e) => e.strategyId === 'milky-speedrun')?.runs).toBe(1)
+
+    // Message-only pick: no valid centre, so no speedrun - and the Diviner
+    // chart is never burned as a side by the fallback strategies
+    const msgPlan = planSession(pool, emptyBorders(), undefined, {}, {
+      'milky-speedrun': 'msg',
+    })
+    expect(msgPlan.entries.find((e) => e.strategyId === 'milky-speedrun')).toBeUndefined()
+  })
+
   it('sequences a ready Meatfish, then Speedruns, then Alc & Go', () => {
     const pool = [
       ...meatfishKit(),

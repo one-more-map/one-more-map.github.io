@@ -146,7 +146,7 @@ const tierValue = (c: ChartData, p: PieceType) =>
       .filter((id) => p.modIds?.includes(id))
       .map((id) => voyageModById.get(id)?.effects[0]?.percent ?? 0),
   )
-const rewardSum = (c: ChartData) => (c.rewards ?? []).reduce((s, e) => s + e.percent, 0)
+export const rewardSum = (c: ChartData) => (c.rewards ?? []).reduce((s, e) => s + e.percent, 0)
 
 /** does this strategy have any recommended piece type matching the chart?
  *  (a banked chart stays spendable by every strategy that wants its type) */

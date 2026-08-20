@@ -3,13 +3,13 @@ import {
   type StrategyDef,
   type StrategyReservationPreferences,
 } from '../data/strategies'
-import { selectPieceBank, strategyWantsChart } from './pieceKeeps'
+import { rewardSum, selectPieceBank, strategyWantsChart } from './pieceKeeps'
 import type { ChartData } from '../types'
 
 type StrategyReservations = {
   /** strategy id - a banked chart is spendable only by its owning strategy */
   id?: string
-} & Pick<StrategyDef, 'allowRareImplicits' | 'allowFractureCharts' | 'reservationGroups'>
+} & Pick<StrategyDef, 'allowRareImplicits' | 'allowFractureCharts' | 'reservationGroups' | 'limits'>
 
 /**
  * The solve pool under the "keep X of each piece type" model: the bank holds
@@ -28,7 +28,7 @@ export function selectStrategySolvePool(
   const bank = selectPieceBank(pool, pieceKeeps, preferences)
 
   const heldFor = new Set<string>()
-  const solvePool = pool.filter((chart) => {
+  let solvePool = pool.filter((chart) => {
     if (lockedUids.has(chart.uid)) return true
     const owner = bank.get(chart.uid)
     if (!owner || owner.strategyId === strategy?.id) return true
@@ -38,6 +38,29 @@ export function selectStrategySolvePool(
     heldFor.add(owner.strategyName)
     return false
   })
+
+  // hard caps (issue #49): a strategy that needs exactly ONE of something
+  // gets exactly one - the best `max` matching charts stay, the rest never
+  // reach the solver. Manually locked charts always stay and count toward
+  // the cap.
+  for (const limit of strategy?.limits ?? []) {
+    const matches = (c: ChartData) =>
+      (limit.modIds?.some((id) => c.modIds.includes(id)) ?? false) ||
+      (limit.areaTypes && c.areaType ? limit.areaTypes.includes(c.areaType) : false)
+    const matching = solvePool.filter(matches)
+    if (matching.length <= limit.max) continue
+    const lockedCount = matching.filter((c) => lockedUids.has(c.uid)).length
+    const keep = new Set(
+      matching
+        .filter((c) => !lockedUids.has(c.uid))
+        .sort((a, b) => rewardSum(b) - rewardSum(a) || b.level - a.level)
+        .slice(0, Math.max(0, limit.max - lockedCount))
+        .map((c) => c.uid),
+    )
+    solvePool = solvePool.filter(
+      (c) => !matches(c) || lockedUids.has(c.uid) || keep.has(c.uid),
+    )
+  }
 
   return {
     solvePool,

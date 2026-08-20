@@ -13,6 +13,13 @@ export interface UpdateEntry {
 
 export const UPDATES: UpdateEntry[] = [
   {
+    date: '2026-08-20',
+    tag: 'new',
+    title: 'Speedrun centre picker + one-Anchorfield cap',
+    detail:
+      'Two community asks from GitHub: the Speedrun card now has a "Centre chart" picker - restrict the centre to Operative\'s, Message or Diviner\'s only, and the excluded families stay safe in your library (readiness and the session planner follow your pick). And Anchorfield Fishing now boards exactly ONE Anchorfield - your best-rolled one - however many you own, matching the strategy\'s own "one is all you need".',
+  },
+  {
     date: '2026-08-19',
     tag: 'new',
     title: 'Chart + border collector - one paste for everything',

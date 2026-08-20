@@ -27,6 +27,8 @@ export interface AppState {
   pieceKeeps: Record<string, number>
   /** chosen layout variant per strategy id (missing = the strategy's default) */
   layoutChoice: Record<string, string>
+  /** chosen centre-piece family per strategy id (missing = best available) */
+  centerChoice: Record<string, string>
 }
 
 export const defaultState = (): AppState => ({
@@ -43,6 +45,7 @@ export const defaultState = (): AppState => ({
   strategyReservations: defaultStrategyReservations(),
   pieceKeeps: {},
   layoutChoice: {},
+  centerChoice: {},
 })
 
 const LS_KEY = 'allflame-voyage-solver'
@@ -142,6 +145,14 @@ function revive(obj: unknown): AppState {
       typeof o.layoutChoice === 'object' && o.layoutChoice !== null && !Array.isArray(o.layoutChoice)
         ? Object.fromEntries(
             Object.entries(o.layoutChoice).filter(
+              (entry): entry is [string, string] => typeof entry[1] === 'string',
+            ),
+          )
+        : {},
+    centerChoice:
+      typeof o.centerChoice === 'object' && o.centerChoice !== null && !Array.isArray(o.centerChoice)
+        ? Object.fromEntries(
+            Object.entries(o.centerChoice).filter(
               (entry): entry is [string, string] => typeof entry[1] === 'string',
             ),
           )

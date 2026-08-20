@@ -199,3 +199,56 @@ describe('keep-count solve pools', () => {
     expect(bank.get('pillar')?.strategyId).toBe('divine-border-rares')
   })
 })
+
+describe('strategy pool limits (issue #49)', () => {
+  const anchorfield = strategyById.get('anchorfield-fishing')!
+
+  it('offers only the single best Anchorfield to Anchorfield Fishing', () => {
+    const pool = [
+      chart({ uid: 'a-weak', areaType: 'anchorfield' as ChartAreaType }),
+      chart({
+        uid: 'a-best',
+        areaType: 'anchorfield' as ChartAreaType,
+        rewards: [{ stat: 'quantity', percent: 80 }],
+      }),
+      chart({
+        uid: 'a-mid',
+        areaType: 'anchorfield' as ChartAreaType,
+        rewards: [{ stat: 'quantity', percent: 40 }],
+      }),
+      chart({ uid: 'junk', modIds: ['voy-quant-1'] }),
+    ]
+    const { solvePool } = selectStrategySolvePool(pool, anchorfield, ALL_ON)
+    const anchors = solvePool.filter((c) => c.areaType === 'anchorfield')
+    expect(anchors.map((c) => c.uid)).toEqual(['a-best'])
+    expect(solvePool.map((c) => c.uid)).toContain('junk')
+  })
+
+  it('locked charts bypass the cap but still count toward it', () => {
+    const pool = [
+      chart({ uid: 'a-locked', areaType: 'anchorfield' as ChartAreaType }),
+      chart({
+        uid: 'a-best',
+        areaType: 'anchorfield' as ChartAreaType,
+        rewards: [{ stat: 'quantity', percent: 80 }],
+      }),
+    ]
+    const { solvePool } = selectStrategySolvePool(
+      pool,
+      anchorfield,
+      ALL_ON,
+      new Set(['a-locked']),
+    )
+    const anchors = solvePool.filter((c) => c.areaType === 'anchorfield')
+    expect(anchors.map((c) => c.uid)).toEqual(['a-locked'])
+  })
+
+  it('applies no cap when the strategy defines no limits', () => {
+    const pool = [
+      chart({ uid: 'a1', areaType: 'anchorfield' as ChartAreaType }),
+      chart({ uid: 'a2', areaType: 'anchorfield' as ChartAreaType }),
+    ]
+    const { solvePool } = selectStrategySolvePool(pool, { id: 'anchorfield-fishing' }, ALL_ON)
+    expect(solvePool.filter((c) => c.areaType === 'anchorfield')).toHaveLength(2)
+  })
+})
