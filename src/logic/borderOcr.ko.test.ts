@@ -71,6 +71,17 @@ describe('Korean border OCR matching', () => {
     )
   })
 
+  it('maps the observed truncated Korean Chaos Orb tooltip', () => {
+    const result = parseBorderOcrPayload(
+      block('인접 지역들 내 회귀 몬스터가 카오스 오브 1개를 추가로 떨어뜨', 1),
+    )
+
+    expect(result.misses).toEqual([])
+    expect(result.matches).toEqual([
+      expect.objectContaining({ index: 1, id: 'b-chaos' }),
+    ])
+  })
+
   it('ignores leading OCR noise and tolerates the observed Captainsbane typo', () => {
     const result = parseBorderOcrPayload(
       block('叭뇩넣\n인접 지역에 지휘관의 파열 등장', 3),
